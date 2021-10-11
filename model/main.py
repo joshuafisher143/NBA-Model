@@ -25,14 +25,6 @@ from model.utils import calculate_EV
 from model.utils import oddsB_to_ML
 from model.utils import get_median_EV
 
-# '''
-# Load files
-
-# prob_win_dict - nested dictionary that contains historical game score-time probabilities
-
-# '''
-# prob_win_dict = pd.read_pickle(config.PROBABILITY_WIN_PATH)
-
 
 def get_EV(bet1, bank_roll, daily_file, prob_win_dict):
         
@@ -194,9 +186,12 @@ def get_EV(bet1, bank_roll, daily_file, prob_win_dict):
         try:
             median_df = median_df.append(get_median_EV(EV_df_over20, median_df, 'EV_low_tier'))
             median_df = median_df.append(get_median_EV(EV_df_over20, median_df, 'EV_higher_tier'))
-        except Exception:
-            pass
-        
+        except:
+            no_bet = [{'lower tier points':'N/A', 'higher tier points':'N/A', 'lower tier fractional':'N/A', 'higher tier fractional':'N/A',
+                          'lower tier team':'N/A', 'higher tier team':'N/A', 'timeB':'N/A', 'low_score':'N/A', 'high_score':'N/A',
+                          'EV_low_tier':'N/A', 'EV_higher_tier':'N/A', 'oddsB lower tier ML':'N/A', 'oddsB higher tier ML':'N/A', 'lvh_prob':'N/A',
+                          'hvl_prob':'N/A', 'lvh_kelly':'N/A', 'hvl_kelly':'N/A'}]
+            median_df = median_df.append(no_bet, ignore_index=True, sort=False)       
     return median_df
             
 # while True:
