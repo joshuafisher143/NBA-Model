@@ -31,39 +31,63 @@
         }
         .dataframe {
             border-radius: 5px;
-            font-size: 18pt;
+            /*font-size: 8pt;*/
             font-weight: normal;
             border: none;
             border-collapse: collapse;
             width: 100%;
-            height: 100%;
-            max-width: 100%;
+            height: 75%;
+            /*max-width: 100%;*/
             white-space: nowrap;
             background-color: white;
         }
         .dataframe td, .dataframe th {
             text-align: center;
             padding: 8px;
+            width: 100%;
         }
         .dataframe td {
             border-right: 1px solid #f8f8f8;
-            font-size: 18pt;
+            font-size: 10pt;
+            width: 100%;
         }
 
         .dataframe thead th {
             color: #ffffff;
             background: #003DA5;
+            width: 100%;
+            font-size: 8pt;
+        }
+        .start_button:active {
+            background: black;
+        }
+        .loading:after {
+            content: "Running Model";
+            background-color: firebrick;
+            color: white;
+            /*padding: 14px 0;*/
+            padding: 14px 0;
+            margin: 10px 0;
+            border: 2px solid black;
+            cursor: grab;
+            width: 40%;
+            font-weight: bold;
+            font-size: 18pt;
+            display: inline-block;
+            text-align: center;
+            /*margin: 24px 50px 12px;*/
         }
     </style>
 </head>
 <body>
 <div class="buttons">
-    <input type = "button" id="start_button" name="start" value="Start Model">
+    <input type = "button" class="start_button button--loading" id="start_button" name="start" value="Start Model">
+    <div class="load"> </div>
     <a href="/remove">
         <input type = "button" id="stop_button" value="Stop Model">
     </a>
-
 </div>
+
 
 <div class = "output_div">
     <div id="out_id"> {{ output | safe}} </div>
@@ -94,12 +118,17 @@
                         document.getElementById('out_id').innerHTML=data;
                     }
                 });
-            }, 1000);
+            }, 65000);
         } else {
             clearInterval(timer);
             timer=null;
         }
     }
+
+    $('#start_button').click(function(){
+        $('#start_button').hide();
+        $('.load').addClass('loading');
+    });
 </script>
 
 </body>

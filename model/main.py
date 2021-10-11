@@ -28,13 +28,10 @@ from model.utils import get_median_EV
 # '''
 # Load files
 
-# 1. prob_win_dict - nested dictionary that contains historical game score-time probabilities
-# 2. daily_file - holds starting odds
+# prob_win_dict - nested dictionary that contains historical game score-time probabilities
+
 # '''
 # prob_win_dict = pd.read_pickle(config.PROBABILITY_WIN_PATH)
-
-# daily_file = pd.read_csv(config.DAILY_FILE)
-
 
 
 def get_EV(bet1, bank_roll, daily_file, prob_win_dict):
@@ -52,8 +49,9 @@ def get_EV(bet1, bank_roll, daily_file, prob_win_dict):
     and amount of time left for each game that is currently live
     '''
     #parse game stats and append to dataframe
-    for key in game_info_dict['games'].keys():
+    for key in range(len(game_info_dict['data'])):
         try:
+            # game_df.append(parse_game_stats(game_info_dict, key))
             game_df = game_df.append(parse_game_stats(game_info_dict, key))
         except:
             continue
@@ -69,7 +67,7 @@ def get_EV(bet1, bank_roll, daily_file, prob_win_dict):
     live and there is a moneyline listed, the home and away moneylines are
     extracted and converted into fractionals. 
     '''
-    for key in go_dict['games'].keys():
+    for key in range(len(go_dict['data'])):
         try:
             odds_df = odds_df.append(parse_odds(key, go_dict))
         except:
@@ -93,8 +91,8 @@ def get_EV(bet1, bank_roll, daily_file, prob_win_dict):
 ######################FILTER DAILY FILE#######################################
 
     for game in live_df.index:
-    
-        daily_file_filtered = daily_file[daily_file['time_sec'] > live_df['Time_elapsed'].loc[game]]
+        dfile = pd.read_csv(daily_file)
+        daily_file_filtered = dfile[dfile['time_sec'] > live_df['Time_elapsed'].loc[game]]
         #filter out teams that don't relate to current looped index
         df_filt_oneT = daily_file_filtered.loc[(daily_file_filtered['lower tier team'] == live_df['Home_Team'].loc[game]) | (daily_file_filtered['higher tier team'] == live_df['Home_Team'].loc[game]),:]
         if len(df_filt_oneT) < 1:
@@ -133,19 +131,25 @@ def get_EV(bet1, bank_roll, daily_file, prob_win_dict):
                 EV_low = calculate_EV(final_df, 'Home_fractional', ind, bet1, bank_roll, lvh_prob_win, oddsB_high)
             else:
                 EV_low = calculate_EV(final_df, 'Away_fractional', ind, bet1, bank_roll, lvh_prob_win, oddsB_high)
-                
-            lvh_kelly = calculate_kelly(lvh_prob_win, bank_roll)
+            
+            try:    
+                lvh_kelly = calculate_kelly(lvh_prob_win, bank_roll)
+            except:
+                lvh_kelly = 0
             
             if EV_low < 0:
                 lvh_kelly=0
 
 #######################CALCULATE EV AND KELLY FOR HIGHER TIER TEAM##############          
             if final_df['Home_Team'].iloc[ind] == final_df['higher tier team'].iloc[ind]:
-                EV_high = calculate_EV(final_df, 'Home_fractional', ind, bet1, bank_roll, hvl_prob_win)
+                EV_high = calculate_EV(final_df, 'Home_fractional', ind, bet1, bank_roll, hvl_prob_win, oddsB_low)
             else:
-                EV_high = calculate_EV(final_df, 'Away_fractional', ind, bet1, bank_roll, hvl_prob_win)
-                
-            hvl_kelly = calculate_kelly(hvl_prob_win, bank_roll)
+                EV_high = calculate_EV(final_df, 'Away_fractional', ind, bet1, bank_roll, hvl_prob_win, oddsB_low)
+            
+            try:
+                hvl_kelly = calculate_kelly(hvl_prob_win, bank_roll)
+            except:
+                hvl_kelly = 0
             
             if EV_high < 0:
                 hvl_kelly = 0
@@ -187,16 +191,17 @@ def get_EV(bet1, bank_roll, daily_file, prob_win_dict):
         EV_df_over20 = EV_df_over20[relevant_feats]
         
 ####################ISOLATE MEDIAN EV FOR EACH TIER###########################
-
-        median_df = median_df.append(get_median_EV(EV_df_over20, median_df, 'EV_low_tier'))
-        median_df = median_df.append(get_median_EV(EV_df_over20, median_df, 'EV_higher_tier'))
-        
+        try:
+            median_df = median_df.append(get_median_EV(EV_df_over20, median_df, 'EV_low_tier'))
+            median_df = median_df.append(get_median_EV(EV_df_over20, median_df, 'EV_higher_tier'))
+        except Exception:
+            pass
         
     return median_df
             
 # while True:
-#     EV = get_EV(bet1, bank_roll)            
-    
+#     EV = get_EV(100, 1000, daily_file, prob_win_dict)            
+#     print(EV)
 #     print('iteration has ended')
 #     time.sleep(65)
 

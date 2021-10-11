@@ -34,14 +34,14 @@ def convert_time(Time):
 
 
 def parse_game_stats(game_info_dict, key):
-    if game_info_dict['games'][key]['status'] == 'Live':
-        GameID = game_info_dict['games'][key]['gameUID']
-        Home_team = game_info_dict['games'][key]['homeTeam']
-        Away_team = game_info_dict['games'][key]['awayTeam']
-        Home_points = game_info_dict['games'][key]['scoreHomeTotal']
-        Away_points = game_info_dict['games'][key]['scoreAwayTotal']
-        current_quarter = game_info_dict['games'][key]['currentPeriod']
-        Time = game_info_dict['games'][key]['currentPeriodTimeRemaining']
+    if game_info_dict['data'][key]['status'] == 'Live':
+        GameID = game_info_dict['data'][key]['gameUID']
+        Home_team = game_info_dict['data'][key]['homeTeam']
+        Away_team = game_info_dict['data'][key]['awayTeam']
+        Home_points = game_info_dict['data'][key]['scoreHomeTotal']
+        Away_points = game_info_dict['data'][key]['scoreAwayTotal']
+        current_quarter = game_info_dict['data'][key]['period']
+        Time = game_info_dict['data'][key]['clock']
 
         
         
@@ -77,17 +77,17 @@ def request_game_odds(game_odds_feed_key):
                 
 
 def parse_odds(key_2, go_dict):
-    if go_dict['games'][key_2]['isLive'] == '1' and go_dict['games'][key_2]['betPrice']:
-        for key_3 in go_dict['games'].keys():
-            if go_dict['games'][key_2]['gameUID'] == go_dict['games'][key_3]['gameUID'] and key_2 != key_3:
-                if go_dict['games'][key_2]['betName'] == go_dict['games'][key_2]['homeTeam']:
-                    Home_ML = go_dict['games'][key_2]['betPrice']
+    if go_dict['data'][key_2]['isLive'] and go_dict['data'][key_2]['betPrice'] and go_dict['data'][key_2]['betType'] == 'Moneyline':
+        for key_3 in range(len(go_dict['data'])):
+            if go_dict['data'][key_2]['gameUID'] == go_dict['data'][key_3]['gameUID'] and key_2 != key_3:
+                if go_dict['data'][key_2]['betName'] == go_dict['data'][key_2]['homeTeam']:
+                    Home_ML = go_dict['data'][key_2]['betPrice']
                     if int(Home_ML) > 0:
                         Home_fractional = int(Home_ML) / 100
                     else:
                         Home_fractional = (-100)/ int(Home_ML)
                     
-                    Away_ML = go_dict['games'][key_3]['betPrice']
+                    Away_ML = go_dict['data'][key_3]['betPrice']
                     if int(Away_ML) > 0:
                         Away_fractional = int(Away_ML) / 100
                     else:
@@ -97,7 +97,7 @@ def parse_odds(key_2, go_dict):
         Home_fractional = 0
         Away_fractional = 0
             
-    GameID = go_dict['games'][key_2]['gameUID']
+    GameID = go_dict['data'][key_2]['gameUID']
 
     temp_df = pd.DataFrame({'GameID':[GameID],
                             'Home_fractional':[Home_fractional],

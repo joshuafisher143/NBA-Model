@@ -16,11 +16,9 @@ if path not in sys.path:
 
 import model.config as config
 import model.main as main
-import model.dummy_function as df
 import pandas as pd
 import json
 
-# bp = Blueprint('bp', __name__)
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'something only you know'
@@ -31,7 +29,7 @@ Load file
 prob_win_dict - nested dictionary that contains historical game score-time probabilities
 
 '''
-# prob_win_dict = pd.read_pickle(config.PROBABILITY_WIN_PATH)
+prob_win_dict = pd.read_pickle(config.PROBABILITY_WIN_PATH)
 
 
 @app.route('/', methods=['POST', 'GET'])
@@ -63,8 +61,8 @@ def run_model():
         bet1 = int(data['bet1'])
         bank_roll = int(data['bank_roll'])
         
-        # daily_file = pd.read_csv('app/static/daily_file.csv')
-        output = df.dummy_function(bet1,bank_roll)
+        daily_file = 'app/static/daily_file.csv'
+        output = main.get_EV(bet1, bank_roll, daily_file, prob_win_dict)
         return render_template('output.html', output=output.to_html(index=False))
     return render_template('output.html')
 
