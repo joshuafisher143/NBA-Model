@@ -10,9 +10,12 @@ from flask import Flask, request, \
 import os
 import sys
 
-path = os.path.abspath(os.path.join('.'))
-if path not in sys.path:
-    sys.path.append(path)
+# path = os.path.abspath(os.path.join('.'))
+# if path not in sys.path:
+#     sys.path.append(path)
+
+if ".." not in sys.path:
+    sys.path.insert(0, '..')
 
 import model.config as config
 import model.main as main
