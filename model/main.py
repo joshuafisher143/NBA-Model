@@ -3,7 +3,6 @@ import numpy as np
 import time
 import datetime
 from fractions import Fraction
-import webbrowser
 import scipy.io
 import requests
 import json
@@ -176,34 +175,26 @@ def get_EV(bet1, bank_roll, daily_file, prob_win_dict):
             
 #####################FINAL DATAFRAME ##########################################
         EV_df_over20 = EV_final_full[(EV_final_full['EV_low_tier'].between(20,100)) | (EV_final_full['EV_higher_tier'].between(20,100))]
-        relevant_feats = ['lower tier points', 'higher tier points', 'lower tier fractional', 'higher tier fractional',
-                          'lower tier team', 'higher tier team', 'timeB', 'low_score', 'high_score',
+        relevant_feats = ['lower tier team', 'higher tier team','lower tier points', 'higher tier points',
+                          'lower tier fractional', 'higher tier fractional','timeB', 'low_score', 'high_score',
                           'EV_low_tier', 'EV_higher_tier', 'oddsB lower tier ML', 'oddsB higher tier ML', 'lvh_prob', 'hvl_prob',
                           'lvh_kelly', 'hvl_kelly']
         EV_df_over20 = EV_df_over20[relevant_feats]
         
 ####################ISOLATE MEDIAN EV FOR EACH TIER###########################
         try:
-            median_df = median_df.append(get_median_EV(EV_df_over20, median_df, 'EV_low_tier'))
-            median_df = median_df.append(get_median_EV(EV_df_over20, median_df, 'EV_higher_tier'))
+            median_df = median_df.append(get_median_EV(EV_df_over20, median_df, 'EV_low_tier'), ignore_index=True)
+            median_df = median_df.append(get_median_EV(EV_df_over20, median_df, 'EV_higher_tier'), ignore_index=True)
         except:
-            no_bet = [{'lower tier points':'N/A', 'higher tier points':'N/A', 'lower tier fractional':'N/A', 'higher tier fractional':'N/A',
-                          'lower tier team':'N/A', 'higher tier team':'N/A', 'timeB':'N/A', 'low_score':'N/A', 'high_score':'N/A',
-                          'EV_low_tier':'N/A', 'EV_higher_tier':'N/A', 'oddsB lower tier ML':'N/A', 'oddsB higher tier ML':'N/A', 'lvh_prob':'N/A',
-                          'hvl_prob':'N/A', 'lvh_kelly':'N/A', 'hvl_kelly':'N/A'}]
-            median_df = median_df.append(no_bet, ignore_index=True, sort=False)       
+            no_bet = pd.DataFrame({'lower tier team':[0], 'higher tier team':[0], 'lower tier points':[0], 'higher tier points':[0],
+                          'lower tier fractional':[0], 'higher tier fractional':[0], 'timeB':[0], 'low_score':[0], 'high_score':[0],
+                          'EV_low_tier':[0], 'EV_higher_tier':[0], 'oddsB lower tier ML':[0], 'oddsB higher tier ML':[0], 'lvh_prob':[0],
+                          'hvl_prob':[0], 'lvh_kelly':[0], 'hvl_kelly':[0]})
+
+            median_df = median_df.append(no_bet, ignore_index=True)
+            
+    output_log = pd.read_csv('app/static/output_log.csv')
+    output_log = output_log.append(median_df[~median_df.applymap(np.isreal).all(1)], ignore_index=True)
+    output_log.to_csv('app/static/output_log.csv', index=False)
     return median_df
             
-# while True:
-#     EV = get_EV(100, 1000, daily_file, prob_win_dict)            
-#     print(EV)
-#     print('iteration has ended')
-#     time.sleep(65)
-
-
-
-
-
-
-
-
