@@ -9,7 +9,7 @@ import json
 import os
 
 #import config file
-import model.config as config
+# import model.config as config
 
 #import functions from utils
 from model.utils import request_game_stats
@@ -28,7 +28,8 @@ from model.utils import get_median_EV
 def get_EV(bet1, bank_roll, daily_file, prob_win_dict):
         
 ######################GAME STATS FOR EACH GAME################################
-    game_info_dict = request_game_stats(config.STATS_API_KEY)
+    # game_info_dict = request_game_stats(config.STATS_API_KEY)
+    game_info_dict = request_game_stats(os.environ['STATS_API_KEY'])
     
     
     #make empty dataframe to append the stats data to for each game
@@ -48,7 +49,7 @@ def get_EV(bet1, bank_roll, daily_file, prob_win_dict):
             continue
 
 ######################GAME ODDS FOR EACH GAME#################################
-    go_dict = request_game_odds(config.ODDS_API_KEY)
+    go_dict = request_game_odds(os.environ['ODDS_API_KEY'])
 
     #make empty dataframe to append odds data to for each game
     odds_df = pd.DataFrame(columns = ['GameID', 'Home_fractional', 'Away_fractional'])
