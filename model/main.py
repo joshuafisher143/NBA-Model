@@ -7,6 +7,7 @@ import scipy.io
 import requests
 import json
 import os
+import gspread
 
 #import config file
 # import model.config as config
@@ -23,6 +24,7 @@ from model.utils import calculate_kelly
 from model.utils import calculate_EV
 from model.utils import oddsB_to_ML
 from model.utils import get_median_EV
+from model.utils import pd_to_gs
 
 
 def get_EV(bet1, bank_roll, daily_file, prob_win_dict):
@@ -193,9 +195,26 @@ def get_EV(bet1, bank_roll, daily_file, prob_win_dict):
                           'hvl_prob':[0], 'lvh_kelly':[0], 'hvl_kelly':[0]})
 
             median_df = median_df.append(no_bet, ignore_index=True)
-            
-    output_log = pd.read_csv('app/static/output_log.csv')
-    output_log = output_log.append(median_df[~median_df.applymap(np.isreal).all(1)], ignore_index=True)
-    output_log.to_csv('app/static/output_log.csv', index=False)
+    
+    #filter out rows where all 0s and update google sheets to log EV outputs
+    EVs = median_df[~median_df.applymap(np.isreal).all(1)]
+    
+    gs_credentials = {
+          "type": os.environ['TYPE'],
+          "project_id": os.environ['PROJECT_ID'],
+          "private_key_id": os.environ['PRIVATE_KEY_ID'],
+          "private_key": os.environ['PRIVATE_KEY'],
+          "client_email": os.environ['CLIENT_EMAIL'],
+          "client_id": os.environ['CLIENT_ID'],
+          "auth_uri": os.environ['AUTH_URI'],
+          "token_uri": os.environ['TOKEN_URI'],
+          "auth_provider_x509_cert_url": os.environ['AUTH_PROVIDER_x509_CERT_URL'],
+          "client_x509_cert_url": os.environ['CLIENT_x509_CERT_URL']
+        }
+    
+    if not EVs.empty:        
+        pd_to_gs(EVs, 'Output_Log', gs_credentials)
+    
+
     return median_df
             

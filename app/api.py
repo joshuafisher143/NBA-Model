@@ -63,6 +63,7 @@ def run_model():
         bank_roll = int(data['bank_roll'])
         
         daily_file = 'app/static/daily_file.csv'
+
         output = main.get_EV(bet1, bank_roll, daily_file, prob_win_dict)
         return render_template('output.html', output=output.to_html(index=False))
     return render_template('output.html')

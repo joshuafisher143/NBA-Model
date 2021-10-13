@@ -11,6 +11,7 @@ import time
 import datetime
 from fractions import Fraction
 import requests
+import gspread
 
 
 
@@ -175,6 +176,13 @@ def get_median_EV(df, median_df, tier):
     return median_df
     
     
+def pd_to_gs(df, worksheet, gs_credentials):
+    # gc = gspread.service_account(filename=gs_credentials)
+    gc = gspread.service_account_from_dict(gs_credentials)
+    sh = gc.open_by_key('1Zxg8JfOYbWxqLfw-N2qMaLPUFN5I86bre916gGsda_k')
+    
+    wks = sh.worksheet(worksheet)
+    wks.append_rows(df.values.tolist())
     
     
     
