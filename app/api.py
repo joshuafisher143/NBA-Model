@@ -30,7 +30,7 @@ prob_win_dict - nested dictionary that contains historical game score-time proba
 
 '''
 # prob_win_dict = pd.read_pickle(config.PROBABILITY_WIN_PATH)
-prob_win_dict = pd.read_pickle('app/static/lvh_count_final.pkl')
+prob_win_dict = pd.read_pickle('lvh_count_final.pkl')
 
 
 @app.route('/', methods=['POST', 'GET'])
