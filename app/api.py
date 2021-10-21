@@ -17,6 +17,7 @@ if path not in sys.path:
 # import model.config as config
 import model.main as main
 import pandas as pd
+import numpy as np
 import json
 
 
