@@ -40,6 +40,7 @@
             /*max-width: 100%;*/
             white-space: nowrap;
             background-color: white;
+            table-layout: fixed;
         }
         .dataframe td, .dataframe th {
             text-align: center;
@@ -51,7 +52,9 @@
             font-size: 10pt;
             width: 100%;
         }
-
+        .dataframe th {
+            overflow-wrap: break-word;
+        }
         .dataframe thead th {
             color: #ffffff;
             background: #003DA5;
@@ -115,7 +118,7 @@
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
 <script>
     document.getElementById('start_button').addEventListener('click',startTimer);
-    let incomeTicker = 65;
+    let incomeTicker = 70;
 
     function startTimer(){
         window.setInterval(function(){
@@ -123,7 +126,7 @@
                 incomeTicker--;
             document.getElementById("timer_box").innerHTML = "Next Output in  : " + incomeTicker + " seconds";
             if (incomeTicker <= 0)
-                incomeTicker = 65;
+                incomeTicker = 70;
         }, 1000);
     }
 
