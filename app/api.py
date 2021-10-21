@@ -48,6 +48,9 @@ def get_inputs():
         
         with open('app/static/inputs.json', 'w') as f:
             json.dump(form_data, f)
+            
+        df = pd.DataFrame(list())
+        df.to_csv('app/static/nightly_EVs.csv')
         
         return redirect(url_for('run_model'))
     return render_template('index.html')
@@ -63,9 +66,15 @@ def run_model():
         bank_roll = int(data['bank_roll'])
         
         daily_file = 'app/static/daily_file.csv'
+        
+        night_EVs = pd.read_csv('app/static/nightly_EVs.csv')
 
         output = main.get_EV(bet1, bank_roll, daily_file, prob_win_dict)
-        return render_template('output.html', output=output.to_html(index=False))
+        
+        significant_EVs = output[~output.loc[:,'lower tier team':].applymap(np.isreal).all(1)]
+        night_EVs = night_EVs.append(significant_EVs, ignore_index=True, sort=False)
+        night_EVs.to_csv('app/static_nightly_EVs.csv')
+        return render_template('output.html', output=output.to_html(index=False), night_EVs = night_EVs.to_html(index=False))
     return render_template('output.html')
 
 @app.route('/remove/')
@@ -73,6 +82,7 @@ def remove_files():
     try:
         os.remove('app/static/daily_file.csv')
         os.remove('app/static/inputs.json')
+        os.remove('app/static/nightly_EVs.csv')
         return redirect(url_for('get_inputs'))
     except Exception as e:
         return str(e)

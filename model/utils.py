@@ -34,7 +34,7 @@ def convert_time(Time):
     return Time_remaining
 
 
-def parse_game_stats(game_info_dict, key):
+def parse_game_stats(game_info_dict, key, current_time):
     if game_info_dict['data'][key]['status'] == 'Live':
         GameID = game_info_dict['data'][key]['gameUID']
         Home_team = game_info_dict['data'][key]['homeTeam']
@@ -59,7 +59,8 @@ def parse_game_stats(game_info_dict, key):
             time_elapsed = quarter_time_elapsed + 2160
             
         
-        temp_df = pd.DataFrame({'GameID':[GameID], 
+        temp_df = pd.DataFrame({'Current_Time':[current_time],
+                                  'GameID':[GameID], 
                                   'Home_Team':[Home_team], 
                                   'Away_Team':[Away_team],
                                   'Home_Points':[Home_points], 

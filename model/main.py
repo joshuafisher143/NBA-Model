@@ -29,6 +29,7 @@ from model.utils import pd_to_gs
 
 def get_EV(bet1, bank_roll, daily_file, prob_win_dict):   
 ######################GAME STATS FOR EACH GAME################################
+    current_time = datetime.datetime.now().strftime('%Y/%m/%d %I:%M:%S')
     # game_info_dict = request_game_stats(config.STATS_API_KEY)
     game_info_dict = request_game_stats(os.environ['STATS_API_KEY'])
     
@@ -45,7 +46,7 @@ def get_EV(bet1, bank_roll, daily_file, prob_win_dict):
     for key in range(len(game_info_dict['data'])):
         try:
             # game_df.append(parse_game_stats(game_info_dict, key))
-            game_df = game_df.append(parse_game_stats(game_info_dict, key))
+            game_df = game_df.append(parse_game_stats(game_info_dict, key, current_time))
         except:
             continue
 
@@ -76,7 +77,7 @@ def get_EV(bet1, bank_roll, daily_file, prob_win_dict):
 
 ######################CREATE MEDIAN DF TO BE USED LATER, OUTSIDE NEXT LOOP#####
 
-    median_df = pd.DataFrame(columns=['lower tier team', 'higher tier team','lower tier points', 'higher tier points',
+    median_df = pd.DataFrame(columns=['Current_Time', 'lower tier team', 'higher tier team','lower tier points', 'higher tier points',
                                       'lower tier fractional', 'higher tier fractional','timeB', 'low_score', 'high_score',
                           'EV_low_tier', 'EV_higher_tier', 'oddsB lower tier ML', 'oddsB higher tier ML', 'lvh_prob', 'hvl_prob',
                           'lvh_kelly', 'hvl_kelly'])
@@ -180,7 +181,7 @@ def get_EV(bet1, bank_roll, daily_file, prob_win_dict):
             
 #####################FINAL DATAFRAME ##########################################
         EV_df_over20 = EV_final_full[(EV_final_full['EV_low_tier'].between(20,100)) | (EV_final_full['EV_higher_tier'].between(20,100))]
-        relevant_feats = ['lower tier team', 'higher tier team','lower tier points', 'higher tier points',
+        relevant_feats = ['Current_Time','lower tier team', 'higher tier team','lower tier points', 'higher tier points',
                           'lower tier fractional', 'higher tier fractional','timeB', 'low_score', 'high_score',
                           'EV_low_tier', 'EV_higher_tier', 'oddsB lower tier ML', 'oddsB higher tier ML', 'lvh_prob', 'hvl_prob',
                           'lvh_kelly', 'hvl_kelly']
@@ -191,7 +192,7 @@ def get_EV(bet1, bank_roll, daily_file, prob_win_dict):
             median_df = median_df.append(get_median_EV(EV_df_over20, median_df, 'EV_low_tier'), ignore_index=True)
             median_df = median_df.append(get_median_EV(EV_df_over20, median_df, 'EV_higher_tier'), ignore_index=True)
         except:
-            no_bet = pd.DataFrame({'lower tier team':[0], 'higher tier team':[0], 'lower tier points':[0], 'higher tier points':[0],
+            no_bet = pd.DataFrame({'Current_Time':[current_time],'lower tier team':[0], 'higher tier team':[0], 'lower tier points':[0], 'higher tier points':[0],
                           'lower tier fractional':[0], 'higher tier fractional':[0], 'timeB':[0], 'low_score':[0], 'high_score':[0],
                           'EV_low_tier':[0], 'EV_higher_tier':[0], 'oddsB lower tier ML':[0], 'oddsB higher tier ML':[0], 'lvh_prob':[0],
                           'hvl_prob':[0], 'lvh_kelly':[0], 'hvl_kelly':[0]})
@@ -199,7 +200,7 @@ def get_EV(bet1, bank_roll, daily_file, prob_win_dict):
             median_df = median_df.append(no_bet, ignore_index=True)
     
     #filter out rows where all 0s and update google sheets to log EV outputs
-    EVs = median_df[~median_df.applymap(np.isreal).all(1)]
+    EVs = median_df[~median_df.loc[:,'lower tier team':].applymap(np.isreal).all(1)]
     
     gs_credentials = {
           "type": os.environ['TYPE'],
