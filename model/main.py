@@ -80,7 +80,7 @@ def get_EV(bet1, bank_roll, daily_file, prob_win_dict):
       "type": os.environ['TYPE'],
       "project_id": os.environ['PROJECT_ID'],
       "private_key_id": os.environ['PRIVATE_KEY_ID'],
-      "private_key": os.environ['PRIVATE_KEY'],
+      "private_key": os.environ['PRIVATE_KEY'].replace("\\n", "\n"),
       "client_email": os.environ['CLIENT_EMAIL'],
       "client_id": os.environ['CLIENT_ID'],
       "auth_uri": os.environ['AUTH_URI'],
