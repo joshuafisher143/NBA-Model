@@ -51,7 +51,7 @@ def get_inputs():
             json.dump(form_data, f)
             
         df = pd.DataFrame(list())
-        df.to_csv('app/static/nightly_EVs.csv')
+        df.to_csv('app/static/nightly_EVs.csv', index=None)
         
         return redirect(url_for('run_model'))
     return render_template('index.html')

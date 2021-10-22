@@ -59,7 +59,7 @@ def parse_game_stats(game_info_dict, key, current_time):
             time_elapsed = quarter_time_elapsed + 2160
             
         
-        temp_df = pd.DataFrame({'Current Time':[current_time],
+        temp_df = pd.DataFrame({'Current Time':[str(current_time)],
                                   'GameID':[GameID], 
                                   'Home_Team':[Home_team], 
                                   'Away_Team':[Away_team],

@@ -192,7 +192,7 @@ def get_EV(bet1, bank_roll, daily_file, prob_win_dict):
             median_df = median_df.append(get_median_EV(EV_df_over20, median_df, 'EV_low_tier'), ignore_index=True)
             median_df = median_df.append(get_median_EV(EV_df_over20, median_df, 'EV_higher_tier'), ignore_index=True)
         except:
-            no_bet = pd.DataFrame({'Current Time':[current_time],'lower tier team':[0], 'higher tier team':[0], 'lower tier points':[0], 'higher tier points':[0],
+            no_bet = pd.DataFrame({'Current Time':[str(current_time)],'lower tier team':[0], 'higher tier team':[0], 'lower tier points':[0], 'higher tier points':[0],
                           'lower tier fractional':[0], 'higher tier fractional':[0], 'timeB':[0], 'low_score':[0], 'high_score':[0],
                           'EV_low_tier':[0], 'EV_higher_tier':[0], 'oddsB lower tier ML':[0], 'oddsB higher tier ML':[0], 'lvh_prob':[0],
                           'hvl_prob':[0], 'lvh_kelly':[0], 'hvl_kelly':[0]})
