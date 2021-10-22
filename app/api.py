@@ -50,7 +50,10 @@ def get_inputs():
         with open('app/static/inputs.json', 'w') as f:
             json.dump(form_data, f)
             
-        df = pd.DataFrame(list())
+        df = pd.DataFrame(columns=['Current Time','lower tier team', 'higher tier team','lower tier points', 'higher tier points',
+                          'lower tier fractional', 'higher tier fractional','timeB', 'low_score', 'high_score',
+                          'EV_low_tier', 'EV_higher_tier', 'oddsB lower tier ML', 'oddsB higher tier ML', 'lvh_prob', 'hvl_prob',
+                          'lvh_kelly', 'hvl_kelly'])
         df.to_csv('app/static/nightly_EVs.csv', index=None)
         
         return redirect(url_for('run_model'))
