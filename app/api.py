@@ -75,8 +75,9 @@ def run_model():
 
         output = main.get_EV(bet1, bank_roll, daily_file, prob_win_dict)
         
-        significant_EVs = output[~output.loc[:,'lower tier team':].applymap(np.isreal).all(1)]
-        night_EVs = night_EVs.append(significant_EVs, ignore_index=True, sort=False)
+        # significant_EVs = output[~output.loc[:,'lower tier team':].applymap(np.isreal).all(1)]
+        # night_EVs = night_EVs.append(significant_EVs, ignore_index=True, sort=False)
+        night_EVs = night_EVs.append(output, ignore_index=True, sort=False)
         night_EVs.to_csv('app/static/nightly_EVs.csv', index=None)
         return render_template('output.html', output=output.to_html(index=False), night_EVs = night_EVs.to_html(index=False))
     return render_template('output.html')
