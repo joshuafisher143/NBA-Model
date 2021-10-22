@@ -89,7 +89,7 @@ def get_EV(bet1, bank_roll, daily_file, prob_win_dict):
       "client_x509_cert_url": os.environ['CLIENT_x509_CERT_URL']
     }
     #save feed api to google sheet
-    pd_to_gs(EVs, 'Datafeeds', gs_credentials)
+    pd_to_gs(live_df, 'Datafeeds', gs_credentials)
 
 
 ######################CREATE MEDIAN DF TO BE USED LATER, OUTSIDE NEXT LOOP#####
