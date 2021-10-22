@@ -85,37 +85,37 @@ def get_EV(bet1, bank_roll, daily_file, prob_win_dict):
 ######################FILTER DAILY FILE#######################################
 
     for game in live_df.index:
-        dfile = pd.read_csv(daily_file)
-        daily_file_filtered = dfile[dfile['time_sec'] > live_df['Time_elapsed'].loc[game]]
-        #filter out teams that don't relate to current looped index
-        df_filt_oneT = daily_file_filtered.loc[(daily_file_filtered['lower tier team'] == live_df['Home_Team'].loc[game]) | (daily_file_filtered['higher tier team'] == live_df['Home_Team'].loc[game]),:]
-        if len(df_filt_oneT) < 1:
-            continue
-        #merge the filtered daily file and the live_df
-        if live_df['Home_Team'].loc[game] == df_filt_oneT['lower tier team'].iloc[0]:
-            final_df = live_df.merge(df_filt_oneT,
-                                 left_on=['Home_Team'],
-                                 right_on = ['lower tier team'])
-        else:
-            final_df = live_df.merge(df_filt_oneT,
-                                 left_on=['Home_Team'],
-                                 right_on = ['higher tier team'])
-
-
-#######################EXTRACT WIN PROBABILITIES##############################
-
-        score_diff = calculate_score_differential(final_df)
-        tier_matchup = str(final_df['lower tier'][0]) + ',' + str(final_df['higher tier'][0])
-        
-        #Empty dataframe for EV calculations
-        ev_out_df = pd.DataFrame(columns=['index', 'EV_low_tier', 'EV_higher_tier',
-                                          'future_time_block', 'oddsB lower tier ML',
-                                          'oddsB higher tier ML', 'lvh_prob',
-                                          'hvl_prob', 'lvh_kelly', 'hvl_kelly'])
-        
-        
-        for ind in final_df.index:
-            try:
+        try:
+            dfile = pd.read_csv(daily_file)
+            daily_file_filtered = dfile[dfile['time_sec'] > live_df['Time_elapsed'].loc[game]]
+            #filter out teams that don't relate to current looped index
+            df_filt_oneT = daily_file_filtered.loc[(daily_file_filtered['lower tier team'] == live_df['Home_Team'].loc[game]) | (daily_file_filtered['higher tier team'] == live_df['Home_Team'].loc[game]),:]
+            if len(df_filt_oneT) < 1:
+                continue
+            #merge the filtered daily file and the live_df
+            if live_df['Home_Team'].loc[game] == df_filt_oneT['lower tier team'].iloc[0]:
+                final_df = live_df.merge(df_filt_oneT,
+                                     left_on=['Home_Team'],
+                                     right_on = ['lower tier team'])
+            else:
+                final_df = live_df.merge(df_filt_oneT,
+                                     left_on=['Home_Team'],
+                                     right_on = ['higher tier team'])
+    
+    
+    #######################EXTRACT WIN PROBABILITIES##############################
+    
+            score_diff = calculate_score_differential(final_df)
+            tier_matchup = str(final_df['lower tier'][0]) + ',' + str(final_df['higher tier'][0])
+            
+            #Empty dataframe for EV calculations
+            ev_out_df = pd.DataFrame(columns=['index', 'EV_low_tier', 'EV_higher_tier',
+                                              'future_time_block', 'oddsB lower tier ML',
+                                              'oddsB higher tier ML', 'lvh_prob',
+                                              'hvl_prob', 'lvh_kelly', 'hvl_kelly'])
+            
+            
+            for ind in final_df.index:
                 oddsB_low = final_df['oddsB lower tier'].iloc[ind]                
                 oddsB_high = final_df['oddsB higher tier'].iloc[ind]
                 
@@ -163,32 +163,30 @@ def get_EV(bet1, bank_roll, daily_file, prob_win_dict):
                             'oddsB higher tier ML':oddsB_high, 'hvl_prob':hvl_prob_win,
                             'lvh_kelly':lvh_kelly, 'hvl_kelly':hvl_kelly}]
                 ev_out_df = ev_out_df.append(ev_data, ignore_index=True, sort=False)
-            except:
-                continue
-
-
-        EV_final_full = final_df.merge(ev_out_df, left_index=True, right_on='index')
-
-
-        #rename columns for easier understanding
-        if EV_final_full['Home_Team'].iloc[0] == EV_final_full['lower tier team'].iloc[0]:
-            EV_final_full = EV_final_full.rename(columns={'Home_Points':'lower tier points', 'Away_Points': 'higher tier points',
-                                          'Home_fractional':'lower tier fractional', 'Away_fractional':'higher tier fractional'})
-        else:
-            EV_final_full = EV_final_full.rename(columns={'Home_Points':'higher tier points', 'Away_Points': 'lower tier points',
-                                          'Home_fractional':'higher tier fractional', 'Away_fractional':'lower tier fractional'})
+    
+    
+    
+            EV_final_full = final_df.merge(ev_out_df, left_index=True, right_on='index')
+    
+    
+            #rename columns for easier understanding
+            if EV_final_full['Home_Team'].iloc[0] == EV_final_full['lower tier team'].iloc[0]:
+                EV_final_full = EV_final_full.rename(columns={'Home_Points':'lower tier points', 'Away_Points': 'higher tier points',
+                                              'Home_fractional':'lower tier fractional', 'Away_fractional':'higher tier fractional'})
+            else:
+                EV_final_full = EV_final_full.rename(columns={'Home_Points':'higher tier points', 'Away_Points': 'lower tier points',
+                                              'Home_fractional':'higher tier fractional', 'Away_fractional':'lower tier fractional'})
+                
+                
+    #####################FINAL DATAFRAME ##########################################
+            EV_df_over20 = EV_final_full[(EV_final_full['EV_low_tier'].between(20,100)) | (EV_final_full['EV_higher_tier'].between(20,100))]
+            relevant_feats = ['Current Time','lower tier team', 'higher tier team','lower tier points', 'higher tier points',
+                              'lower tier fractional', 'higher tier fractional','timeB', 'low_score', 'high_score',
+                              'EV_low_tier', 'EV_higher_tier', 'oddsB lower tier ML', 'oddsB higher tier ML', 'lvh_prob', 'hvl_prob',
+                              'lvh_kelly', 'hvl_kelly']
+            EV_df_over20 = EV_df_over20[relevant_feats]
             
-            
-#####################FINAL DATAFRAME ##########################################
-        EV_df_over20 = EV_final_full[(EV_final_full['EV_low_tier'].between(20,100)) | (EV_final_full['EV_higher_tier'].between(20,100))]
-        relevant_feats = ['Current Time','lower tier team', 'higher tier team','lower tier points', 'higher tier points',
-                          'lower tier fractional', 'higher tier fractional','timeB', 'low_score', 'high_score',
-                          'EV_low_tier', 'EV_higher_tier', 'oddsB lower tier ML', 'oddsB higher tier ML', 'lvh_prob', 'hvl_prob',
-                          'lvh_kelly', 'hvl_kelly']
-        EV_df_over20 = EV_df_over20[relevant_feats]
-        
 ####################ISOLATE MEDIAN EV FOR EACH TIER###########################
-        try:
             median_df = median_df.append(get_median_EV(EV_df_over20, median_df, 'EV_low_tier'), ignore_index=True)
             median_df = median_df.append(get_median_EV(EV_df_over20, median_df, 'EV_higher_tier'), ignore_index=True)
         except:
