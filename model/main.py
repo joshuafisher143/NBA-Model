@@ -206,16 +206,17 @@ def get_EV(bet1, bank_roll, daily_file, prob_win_dict):
 ####################ISOLATE MEDIAN EV FOR EACH TIER###########################
         try:
             median_df = median_df.append(get_median_EV(EV_df_over20, median_df, 'EV_low_tier'), ignore_index=True)
-            median_df = median_df.append(get_median_EV(EV_df_over20, median_df, 'EV_higher_tier'), ignore_index=True)
-            # pd_to_gs(median_df, 'Output_Log', gs_credentials)
-        except:
-
-            max_low_EV = EV_final_full[EV_final_full['EV_low_tier'] == EV_final_full['EV_low_tier'].max()]
-            max_high_EV = EV_final_full[EV_final_full['EV_higher_tier'] == EV_final_full['EV_higher_tier'].max()]
-            
-            max_merge = pd.concat([max_low_EV, max_high_EV], ignore_index=True)
-            
             median_df = median_df.append(max_merge, ignore_index=True)
-    
+        except:
+            max_low_EV = EV_final_full[EV_final_full['EV_low_tier'] == EV_final_full['EV_low_tier'].max()].iloc[0]
+            median_df = median_df.append(max_low_EV, ignore_index=True)
+        try:
+            median_df = median_df.append(get_median_EV(EV_df_over20, median_df, 'EV_higher_tier'), ignore_index=True)
+            median_df = median_df.append(max_merge, ignore_index=True)
+        except:
+            max_high_EV = EV_final_full[EV_final_full['EV_higher_tier'] == EV_final_full['EV_higher_tier'].max()].iloc[0]
+            median_df = median_df.append(max_low_EV, ignore_index=True)
+        
+        # pd_to_gs(median_df, 'Output_Log', gs_credentials)
 
     return median_df
