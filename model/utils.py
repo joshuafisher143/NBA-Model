@@ -137,7 +137,7 @@ def get_probabilities(final_df, ind, lvh_count_dict, score_diff, tier_matchup, o
     if lvh_prob_win == 0:
         hvl_prob_win = 0
     else:
-        hvl_prob_win = lvh_prob_win
+        hvl_prob_win = 1 - lvh_prob_win
         
     return lvh_prob_win, hvl_prob_win, future_time
     
