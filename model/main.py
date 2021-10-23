@@ -102,84 +102,86 @@ def get_EV(bet1, bank_roll, daily_file, prob_win_dict):
 ######################FILTER DAILY FILE#######################################
 
     for game in live_df.index:
-        dfile = pd.read_csv(daily_file)
-        daily_file_filtered = dfile[dfile['time_sec'] > live_df['Time_elapsed'].loc[game]]
-        #filter out teams that don't relate to current looped index
-        df_filt_oneT = daily_file_filtered.loc[(daily_file_filtered['lower tier team'] == live_df['Home_Team'].loc[game]) | (daily_file_filtered['higher tier team'] == live_df['Home_Team'].loc[game]),:]
-        if len(df_filt_oneT) < 1:
+        try:
+            dfile = pd.read_csv(daily_file)
+            daily_file_filtered = dfile[dfile['time_sec'] > live_df['Time_elapsed'].loc[game]]
+            #filter out teams that don't relate to current looped index
+            df_filt_oneT = daily_file_filtered.loc[(daily_file_filtered['lower tier team'] == live_df['Home_Team'].loc[game]) | (daily_file_filtered['higher tier team'] == live_df['Home_Team'].loc[game]),:]
+            if len(df_filt_oneT) < 1:
+                continue
+            #merge the filtered daily file and the live_df
+            if live_df['Home_Team'].loc[game] == df_filt_oneT['lower tier team'].iloc[0]:
+                final_df = live_df.merge(df_filt_oneT,
+                                     left_on=['Home_Team'],
+                                     right_on = ['lower tier team'])
+            else:
+                final_df = live_df.merge(df_filt_oneT,
+                                     left_on=['Home_Team'],
+                                     right_on = ['higher tier team'])
+    
+    
+    #######################EXTRACT WIN PROBABILITIES##############################
+    
+            score_diff = calculate_score_differential(final_df)
+            tier_matchup = str(final_df['lower tier'][0]) + ',' + str(final_df['higher tier'][0])
+            
+            #Empty dataframe for EV calculations
+            ev_out_df = pd.DataFrame(columns=['index', 'EV_low_tier', 'EV_higher_tier',
+                                              'future_time_block', 'oddsB lower tier ML',
+                                              'oddsB higher tier ML', 'lvh_prob',
+                                              'hvl_prob', 'lvh_kelly', 'hvl_kelly'])
+            
+            
+            for ind in final_df.index:
+                oddsB_low = final_df['oddsB lower tier'].iloc[ind]                
+                oddsB_high = final_df['oddsB higher tier'].iloc[ind]
+                
+                lvh_prob_win, hvl_prob_win, future_time = get_probabilities(final_df, ind, prob_win_dict, score_diff, tier_matchup, oddsB_low, oddsB_high)
+                
+    #######################CALCULATE EV AND KELLY FOR LOWER TIER TEAM##############              
+                if final_df['Home_Team'].iloc[ind] == final_df['lower tier team'].iloc[ind]:
+                    EV_low = calculate_EV(final_df, 'Home_fractional', ind, bet1, bank_roll, lvh_prob_win, oddsB_high)
+                else:
+                    EV_low = calculate_EV(final_df, 'Away_fractional', ind, bet1, bank_roll, lvh_prob_win, oddsB_high)
+                
+                try:    
+                    lvh_kelly = calculate_kelly(lvh_prob_win, bank_roll)
+                except:
+                    lvh_kelly = 0
+                
+                if EV_low < 0:
+                    lvh_kelly=0
+    
+    #######################CALCULATE EV AND KELLY FOR HIGHER TIER TEAM##############          
+                if final_df['Home_Team'].iloc[ind] == final_df['higher tier team'].iloc[ind]:
+                    EV_high = calculate_EV(final_df, 'Home_fractional', ind, bet1, bank_roll, hvl_prob_win, oddsB_low)
+                else:
+                    EV_high = calculate_EV(final_df, 'Away_fractional', ind, bet1, bank_roll, hvl_prob_win, oddsB_low)
+                
+                try:
+                    hvl_kelly = calculate_kelly(hvl_prob_win, bank_roll)
+                except:
+                    hvl_kelly = 0
+                
+                if EV_high < 0:
+                    hvl_kelly = 0
+                    
+                    
+    #######################CONVERT ODDSB TO MONEYLINE#############################
+    
+                oddsB_low = oddsB_to_ML(oddsB_low)
+                oddsB_high = oddsB_to_ML(oddsB_high)
+    
+    #######################APPEND EV DATA TO DATAFRAME#############################
+                
+                ev_data = [{'index': ind, 'EV_low_tier': EV_low,
+                            'EV_higher_tier': EV_high, 'future_time_block': future_time,
+                            'lvh_prob': lvh_prob_win, 'oddsB lower tier ML':oddsB_low,
+                            'oddsB higher tier ML':oddsB_high, 'hvl_prob':hvl_prob_win,
+                            'lvh_kelly':lvh_kelly, 'hvl_kelly':hvl_kelly}]
+                ev_out_df = ev_out_df.append(ev_data, ignore_index=True, sort=False)
+        except:
             continue
-        #merge the filtered daily file and the live_df
-        if live_df['Home_Team'].loc[game] == df_filt_oneT['lower tier team'].iloc[0]:
-            final_df = live_df.merge(df_filt_oneT,
-                                 left_on=['Home_Team'],
-                                 right_on = ['lower tier team'])
-        else:
-            final_df = live_df.merge(df_filt_oneT,
-                                 left_on=['Home_Team'],
-                                 right_on = ['higher tier team'])
-
-
-#######################EXTRACT WIN PROBABILITIES##############################
-
-        score_diff = calculate_score_differential(final_df)
-        tier_matchup = str(final_df['lower tier'][0]) + ',' + str(final_df['higher tier'][0])
-        
-        #Empty dataframe for EV calculations
-        ev_out_df = pd.DataFrame(columns=['index', 'EV_low_tier', 'EV_higher_tier',
-                                          'future_time_block', 'oddsB lower tier ML',
-                                          'oddsB higher tier ML', 'lvh_prob',
-                                          'hvl_prob', 'lvh_kelly', 'hvl_kelly'])
-        
-        
-        for ind in final_df.index:
-            oddsB_low = final_df['oddsB lower tier'].iloc[ind]                
-            oddsB_high = final_df['oddsB higher tier'].iloc[ind]
-            
-            lvh_prob_win, hvl_prob_win, future_time = get_probabilities(final_df, ind, prob_win_dict, score_diff, tier_matchup, oddsB_low, oddsB_high)
-            
-#######################CALCULATE EV AND KELLY FOR LOWER TIER TEAM##############              
-            if final_df['Home_Team'].iloc[ind] == final_df['lower tier team'].iloc[ind]:
-                EV_low = calculate_EV(final_df, 'Home_fractional', ind, bet1, bank_roll, lvh_prob_win, oddsB_high)
-            else:
-                EV_low = calculate_EV(final_df, 'Away_fractional', ind, bet1, bank_roll, lvh_prob_win, oddsB_high)
-            
-            try:    
-                lvh_kelly = calculate_kelly(lvh_prob_win, bank_roll)
-            except:
-                lvh_kelly = 0
-            
-            if EV_low < 0:
-                lvh_kelly=0
-
-#######################CALCULATE EV AND KELLY FOR HIGHER TIER TEAM##############          
-            if final_df['Home_Team'].iloc[ind] == final_df['higher tier team'].iloc[ind]:
-                EV_high = calculate_EV(final_df, 'Home_fractional', ind, bet1, bank_roll, hvl_prob_win, oddsB_low)
-            else:
-                EV_high = calculate_EV(final_df, 'Away_fractional', ind, bet1, bank_roll, hvl_prob_win, oddsB_low)
-            
-            try:
-                hvl_kelly = calculate_kelly(hvl_prob_win, bank_roll)
-            except:
-                hvl_kelly = 0
-            
-            if EV_high < 0:
-                hvl_kelly = 0
-                
-                
-#######################CONVERT ODDSB TO MONEYLINE#############################
-
-            oddsB_low = oddsB_to_ML(oddsB_low)
-            oddsB_high = oddsB_to_ML(oddsB_high)
-
-#######################APPEND EV DATA TO DATAFRAME#############################
-            
-            ev_data = [{'index': ind, 'EV_low_tier': EV_low,
-                        'EV_higher_tier': EV_high, 'future_time_block': future_time,
-                        'lvh_prob': lvh_prob_win, 'oddsB lower tier ML':oddsB_low,
-                        'oddsB higher tier ML':oddsB_high, 'hvl_prob':hvl_prob_win,
-                        'lvh_kelly':lvh_kelly, 'hvl_kelly':hvl_kelly}]
-            ev_out_df = ev_out_df.append(ev_data, ignore_index=True, sort=False)
-
 
 
         EV_final_full = final_df.merge(ev_out_df, left_index=True, right_on='index')
