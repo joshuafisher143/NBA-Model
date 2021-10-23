@@ -95,7 +95,7 @@ def get_EV(bet1, bank_roll, daily_file, prob_win_dict):
 ######################CREATE MEDIAN DF TO BE USED LATER, OUTSIDE NEXT LOOP#####
 
     median_df = pd.DataFrame(columns=['Current Time', 'lower tier team', 'higher tier team','lower tier points', 'higher tier points',
-                                      'lower tier fractional', 'higher tier fractional','timeB', 'low_score', 'high_score',
+                                      'lower tier fractional', 'higher tier fractional','timeB', 'low_score',
                           'EV_low_tier', 'EV_higher_tier', 'oddsB lower tier ML', 'oddsB higher tier ML', 'lvh_prob', 'hvl_prob',
                           'lvh_kelly', 'hvl_kelly'])
 
@@ -199,7 +199,7 @@ def get_EV(bet1, bank_roll, daily_file, prob_win_dict):
 #####################FINAL DATAFRAME ##########################################
         EV_df_over20 = EV_final_full[(EV_final_full['EV_low_tier'].between(20,100)) | (EV_final_full['EV_higher_tier'].between(20,100))]
         relevant_feats = ['Current Time','lower tier team', 'higher tier team','lower tier points', 'higher tier points',
-                          'lower tier fractional', 'higher tier fractional','timeB', 'low_score', 'high_score',
+                          'lower tier fractional', 'higher tier fractional','timeB', 'low_score',
                           'EV_low_tier', 'EV_higher_tier', 'oddsB lower tier ML', 'oddsB higher tier ML', 'lvh_prob', 'hvl_prob',
                           'lvh_kelly', 'hvl_kelly']
         EV_df_over20 = EV_df_over20[relevant_feats]
@@ -208,17 +208,17 @@ def get_EV(bet1, bank_roll, daily_file, prob_win_dict):
 ####################ISOLATE MEDIAN EV FOR EACH TIER###########################
         try:
             median_df = median_df.append(get_median_EV(EV_df_over20, median_df, 'EV_low_tier'), ignore_index=True)
-            median_df = median_df.append(max_merge, ignore_index=True)
         except:
             max_low_EV = EV_final_full[EV_final_full['EV_low_tier'] == EV_final_full['EV_low_tier'].max()].iloc[0]
             median_df = median_df.append(max_low_EV, ignore_index=True)
         try:
             median_df = median_df.append(get_median_EV(EV_df_over20, median_df, 'EV_higher_tier'), ignore_index=True)
-            median_df = median_df.append(max_merge, ignore_index=True)
         except:
             max_high_EV = EV_final_full[EV_final_full['EV_higher_tier'] == EV_final_full['EV_higher_tier'].max()].iloc[0]
             median_df = median_df.append(max_low_EV, ignore_index=True)
         
         # pd_to_gs(median_df, 'Output_Log', gs_credentials)
+        
+        median_df = median_df.drop_duplicates()
 
     return median_df
