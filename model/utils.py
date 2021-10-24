@@ -128,18 +128,16 @@ def get_probabilities(final_df, ind, lvh_count_dict, score_diff, tier_matchup, o
         lvh_prob_win_dist = lvh_count_dict[tier_matchup][time_score][str(future_time)].copy()
         lvh_prob_win_dist.loc[:,'-60':'59'] = lvh_prob_win_dist.div(lvh_prob_win_dist.sum(axis=1)[0], axis=0)
         if score_diff < future_score:
-            lvh_prob_win = lvh_prob_win_dist.loc[:,str(future_score):].sum(axis=1)[0]
+            prob_win = lvh_prob_win_dist.loc[:,str(future_score):].sum(axis=1)[0]
+            
         else:
-            lvh_prob_win = lvh_prob_win_dist.loc[:,:str(future_score)].sum(axis=1)[0]
+            prob_win = lvh_prob_win_dist.loc[:,:str(future_score)].sum(axis=1)[0]
+            
     else:
-        lvh_prob_win = 0
-    
-    if lvh_prob_win == 0:
-        hvl_prob_win = 0
-    else:
-        hvl_prob_win = 1 - lvh_prob_win
+        prob_win = 0
+        prob_win = 0
         
-    return lvh_prob_win, hvl_prob_win, future_time
+    return prob_win, future_time
     
 
 def calculate_kelly(prob_win, bank_roll):

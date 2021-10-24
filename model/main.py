@@ -96,8 +96,7 @@ def get_EV(bet1, bank_roll, daily_file, prob_win_dict):
 
     median_df = pd.DataFrame(columns=['Current Time', 'lower tier team', 'higher tier team','lower tier points', 'higher tier points',
                                       'lower tier fractional', 'higher tier fractional','timeB', 'low_score',
-                          'EV_low_tier', 'EV_higher_tier', 'oddsB lower tier ML', 'oddsB higher tier ML', 'lvh_prob', 'hvl_prob',
-                          'lvh_kelly', 'hvl_kelly'])
+                          'EV_low_tier', 'EV_higher_tier', 'oddsB lower tier ML', 'oddsB higher tier ML', 'probability', 'kelly'])
 
 ######################FILTER DAILY FILE#######################################
 
@@ -128,43 +127,34 @@ def get_EV(bet1, bank_roll, daily_file, prob_win_dict):
             #Empty dataframe for EV calculations
             ev_out_df = pd.DataFrame(columns=['index', 'EV_low_tier', 'EV_higher_tier',
                                               'future_time_block', 'oddsB lower tier ML',
-                                              'oddsB higher tier ML', 'lvh_prob',
-                                              'hvl_prob', 'lvh_kelly', 'hvl_kelly'])
+                                              'oddsB higher tier ML', 'probability',' kelly'])
             
             
             for ind in final_df.index:
                 oddsB_low = final_df['oddsB lower tier'].iloc[ind]                
                 oddsB_high = final_df['oddsB higher tier'].iloc[ind]
                 
-                lvh_prob_win, hvl_prob_win, future_time = get_probabilities(final_df, ind, prob_win_dict, score_diff, tier_matchup, oddsB_low, oddsB_high)
+                prob_win, future_time = get_probabilities(final_df, ind, prob_win_dict, score_diff, tier_matchup, oddsB_low, oddsB_high)
                 
     #######################CALCULATE EV AND KELLY FOR LOWER TIER TEAM##############              
                 if final_df['Home_Team'].iloc[ind] == final_df['lower tier team'].iloc[ind]:
-                    EV_low = calculate_EV(final_df, 'Home_fractional', ind, bet1, bank_roll, lvh_prob_win, oddsB_high)
+                    EV_low = calculate_EV(final_df, 'Home_fractional', ind, bet1, bank_roll, prob_win, oddsB_high)
                 else:
-                    EV_low = calculate_EV(final_df, 'Away_fractional', ind, bet1, bank_roll, lvh_prob_win, oddsB_high)
-                
-                try:    
-                    lvh_kelly = calculate_kelly(lvh_prob_win, bank_roll)
-                except:
-                    lvh_kelly = 0
-                
-                if EV_low < 0:
-                    lvh_kelly=0
+                    EV_low = calculate_EV(final_df, 'Away_fractional', ind, bet1, bank_roll, prob_win, oddsB_high)
     
     #######################CALCULATE EV AND KELLY FOR HIGHER TIER TEAM##############          
                 if final_df['Home_Team'].iloc[ind] == final_df['higher tier team'].iloc[ind]:
-                    EV_high = calculate_EV(final_df, 'Home_fractional', ind, bet1, bank_roll, hvl_prob_win, oddsB_low)
+                    EV_high = calculate_EV(final_df, 'Home_fractional', ind, bet1, bank_roll, prob_win, oddsB_low)
                 else:
-                    EV_high = calculate_EV(final_df, 'Away_fractional', ind, bet1, bank_roll, hvl_prob_win, oddsB_low)
+                    EV_high = calculate_EV(final_df, 'Away_fractional', ind, bet1, bank_roll, prob_win, oddsB_low)
                 
                 try:
-                    hvl_kelly = calculate_kelly(hvl_prob_win, bank_roll)
+                    kelly = calculate_kelly(prob_win, bank_roll)
                 except:
-                    hvl_kelly = 0
+                    kelly = 0
                 
                 if EV_high < 0:
-                    hvl_kelly = 0
+                    kelly = 0
                     
                     
     #######################CONVERT ODDSB TO MONEYLINE#############################
@@ -176,9 +166,8 @@ def get_EV(bet1, bank_roll, daily_file, prob_win_dict):
                 
                 ev_data = [{'index': ind, 'EV_low_tier': EV_low,
                             'EV_higher_tier': EV_high, 'future_time_block': future_time,
-                            'lvh_prob': lvh_prob_win, 'oddsB lower tier ML':oddsB_low,
-                            'oddsB higher tier ML':oddsB_high, 'hvl_prob':hvl_prob_win,
-                            'lvh_kelly':lvh_kelly, 'hvl_kelly':hvl_kelly}]
+                            'oddsB lower tier ML':oddsB_low, 'oddsB higher tier ML':oddsB_high, 
+                            'probability':prob_win,'kelly':kelly}]
                 ev_out_df = ev_out_df.append(ev_data, ignore_index=True, sort=False)
         except:
             continue
@@ -200,8 +189,7 @@ def get_EV(bet1, bank_roll, daily_file, prob_win_dict):
         EV_df_over20 = EV_final_full[(EV_final_full['EV_low_tier'].between(20,100)) | (EV_final_full['EV_higher_tier'].between(20,100))]
         relevant_feats = ['Current Time','lower tier team', 'higher tier team','lower tier points', 'higher tier points',
                           'lower tier fractional', 'higher tier fractional','timeB', 'low_score',
-                          'EV_low_tier', 'EV_higher_tier', 'oddsB lower tier ML', 'oddsB higher tier ML', 'lvh_prob', 'hvl_prob',
-                          'lvh_kelly', 'hvl_kelly']
+                          'EV_low_tier', 'EV_higher_tier', 'oddsB lower tier ML', 'oddsB higher tier ML', 'probability', 'kelly']
         EV_df_over20 = EV_df_over20[relevant_feats]
         EV_final_full = EV_final_full[relevant_feats]
         
@@ -215,7 +203,7 @@ def get_EV(bet1, bank_roll, daily_file, prob_win_dict):
             median_df = median_df.append(get_median_EV(EV_df_over20, median_df, 'EV_higher_tier'), ignore_index=True)
         except:
             max_high_EV = EV_final_full[EV_final_full['EV_higher_tier'] == EV_final_full['EV_higher_tier'].max()].iloc[0]
-            median_df = median_df.append(max_low_EV, ignore_index=True)
+            median_df = median_df.append(max_high_EV, ignore_index=True)
         
         # pd_to_gs(median_df, 'Output_Log', gs_credentials)
         
