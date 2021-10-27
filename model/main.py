@@ -90,12 +90,10 @@ def get_EV(bet1, bank_roll, daily_file, prob_win_dict):
     # }
     # #save feed api to google sheet
     gs_credentials = os.environ.get('GOOGLE_APPLICATION_CREDENTIALS')
-    gs_credentials_data = json.loads(gs_credentials)
+    gs_credentials_data = json.loads(gs_credentials, strict=False)
     
-    try:
-        pd_to_gs(live_df, 'Datafeeds', gs_credentials_data)
-    except:
-        pass
+    pd_to_gs(live_df, 'Datafeeds', gs_credentials_data)
+
 
 
 ######################CREATE MEDIAN DF TO BE USED LATER, OUTSIDE NEXT LOOP#####
@@ -211,10 +209,9 @@ def get_EV(bet1, bank_roll, daily_file, prob_win_dict):
             max_high_EV = EV_final_full[EV_final_full['EV_higher_tier'] == EV_final_full['EV_higher_tier'].max()].iloc[0]
             median_df = median_df.append(max_high_EV, ignore_index=True)
         
-        try:
-            pd_to_gs(median_df, 'Output_Log', gs_credentials_data)
-        except:
-            pass
+
+        pd_to_gs(median_df, 'Output_Log', gs_credentials_data)
+
         
         median_df = median_df.drop_duplicates()
 
