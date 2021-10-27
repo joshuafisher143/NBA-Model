@@ -6,3 +6,4 @@ pip
 requests
 scipy
 gspread
+selenium

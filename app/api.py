@@ -19,6 +19,7 @@ import model.main as main
 import pandas as pd
 import numpy as np
 import json
+import make_daily_file as mdf
 
 
 app = Flask(__name__)
@@ -30,18 +31,17 @@ Load file
 prob_win_dict - nested dictionary that contains historical game score-time probabilities
 
 '''
-# prob_win_dict = pd.read_pickle(config.PROBABILITY_WIN_PATH)
 prob_win_dict = pd.read_pickle('small_prob_dist.pkl')
 
 
 @app.route('/', methods=['POST', 'GET'])
 def get_inputs():
     if request.method == 'POST':
-        uploaded_file = request.files['daily_file']
+        # uploaded_file = request.files['daily_file']
         if not os.path.isdir('app/static'):
             os.mkdir('app/static')
-        filepath = os.path.join('app/static', uploaded_file.filename)
-        uploaded_file.save(filepath)
+        # filepath = os.path.join('app/static', uploaded_file.filename)
+        # uploaded_file.save(filepath)
         
         #Get Bet1 and bank_roll inputs and dump
         #into json for later use
@@ -51,10 +51,15 @@ def get_inputs():
             json.dump(form_data, f)
             
         df = pd.DataFrame(columns=['Current Time','lower tier team', 'higher tier team','lower tier points', 'higher tier points',
-                          'lower tier fractional', 'higher tier fractional','timeB', 'low_score', 'high_score',
-                          'EV_low_tier', 'EV_higher_tier', 'oddsB lower tier ML', 'oddsB higher tier ML', 'lvh_prob', 'hvl_prob',
-                          'lvh_kelly', 'hvl_kelly'])
+                          'lower tier fractional', 'higher tier fractional','timeB', 'low_score', 'EV_low_tier',
+                          'EV_higher_tier', 'oddsB lower tier ML', 'oddsB higher tier ML', 'probability', 'kelly'])
+        
         df.to_csv('app/static/nightly_EVs.csv', index=None)
+        
+        
+        
+        daily_file = mdf.make_full_daily_file()
+        daily_file.to_csv('app/static/daily_file.csv', index=None)
         
         return redirect(url_for('run_model'))
     return render_template('index.html')
