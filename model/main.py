@@ -76,20 +76,8 @@ def get_EV(bet1, bank_roll, daily_file, prob_win_dict):
     live_df = game_df.merge(odds_df, on=['GameID'])
     live_df = live_df.set_index('GameID')
     
-    # gs_credentials = {
-    #   "type": os.environ['TYPE'],
-    #   "project_id": os.environ['PROJECT_ID'],
-    #   "private_key_id": os.environ['PRIVATE_KEY_ID'],
-    #   "private_key": os.environ['PRIVATE_KEY'],
-    #   "client_email": os.environ['CLIENT_EMAIL'],
-    #   "client_id": os.environ['CLIENT_ID'],
-    #   "auth_uri": os.environ['AUTH_URI'],
-    #   "token_uri": os.environ['TOKEN_URI'],
-    #   "auth_provider_x509_cert_url": os.environ['AUTH_PROVIDER_x509_CERT_URL'],
-    #   "client_x509_cert_url": os.environ['CLIENT_x509_CERT_URL']
-    # }
     # #save feed api to google sheet
-    gs_credentials = os.environ.get('GOOGLE_APPLICATION_CREDENTIALS')
+    gs_credentials = os.environ['GOOGLE_CREDENTIALS']
     gs_credentials_data = json.loads(gs_credentials, strict=False)
     
     pd_to_gs(live_df, 'Datafeeds', gs_credentials_data)
