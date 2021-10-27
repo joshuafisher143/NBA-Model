@@ -92,7 +92,10 @@ def get_EV(bet1, bank_roll, daily_file, prob_win_dict):
     gs_credentials = os.environ.get('GOOGLE_APPLICATION_CREDENTIALS')
     gs_credentials_data = json.loads(gs_credentials)
     
-    pd_to_gs(live_df, 'Datafeeds', gs_credentials_data)
+    try:
+        pd_to_gs(live_df, 'Datafeeds', gs_credentials_data)
+    except:
+        pass
 
 
 ######################CREATE MEDIAN DF TO BE USED LATER, OUTSIDE NEXT LOOP#####
@@ -208,7 +211,10 @@ def get_EV(bet1, bank_roll, daily_file, prob_win_dict):
             max_high_EV = EV_final_full[EV_final_full['EV_higher_tier'] == EV_final_full['EV_higher_tier'].max()].iloc[0]
             median_df = median_df.append(max_high_EV, ignore_index=True)
         
-        pd_to_gs(median_df, 'Output_Log', gs_credentials_data)
+        try:
+            pd_to_gs(median_df, 'Output_Log', gs_credentials_data)
+        except:
+            pass
         
         median_df = median_df.drop_duplicates()
 
