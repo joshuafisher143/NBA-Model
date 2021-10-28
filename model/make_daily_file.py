@@ -53,7 +53,8 @@ def get_portal_odds():
             odds2 = driver.find_element(By.XPATH,'//*[@id="tournamentTable"]/tbody/tr[{}]/td[5]/a'.format(i)).text
             
             df = df.append({'lower tier team': team1, 'higher tier team':team2, 'oddsB lower tier':odds1, 'oddsB higher tier':odds2}, ignore_index=True)
-
+        else:
+            continue
         
     for row in range(len(df)):
         if df['oddsB lower tier'].iloc[row] > df['oddsB higher tier'].iloc[row]:
