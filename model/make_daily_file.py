@@ -17,11 +17,11 @@ def get_portal_odds():
     options.add_argument('headless')
     options.add_argument('--disable-gpu')
     options.add_argument('--no-sandbox')
-    # options.binary_location = os.environ['GOOGLE_CHROME_BIN']
-    options.binary_location = 'C:/Program Files (x86)/Google/Chrome/Application/chrome.exe'
+    options.binary_location = os.environ['GOOGLE_CHROME_BIN']
+    # options.binary_location = 'C:/Program Files (x86)/Google/Chrome/Application/chrome.exe'
 
-    driver = webdriver.Chrome(options=options, executable_path='C:/Users/joshu/Documents/py_projects/NBA-Model/old/chromedriver.exe')
-    # driver = webdriver.Chrome(options=options, executable_path=os.environ['CHROMEDRIVER_PATH'])
+    # driver = webdriver.Chrome(options=options, executable_path='C:/Users/joshu/Documents/py_projects/NBA-Model/old/chromedriver.exe')
+    driver = webdriver.Chrome(options=options, executable_path=os.environ['CHROMEDRIVER_PATH'])
     driver.get('https://www.oddsportal.com/basketball/usa/nba/')   
     
     
