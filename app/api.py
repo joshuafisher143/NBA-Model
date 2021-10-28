@@ -37,11 +37,9 @@ prob_win_dict = pd.read_pickle('small_prob_dist.pkl')
 @app.route('/', methods=['POST', 'GET'])
 def get_inputs():
     if request.method == 'POST':
-        # uploaded_file = request.files['daily_file']
+
         if not os.path.isdir('app/static'):
             os.mkdir('app/static')
-        # filepath = os.path.join('app/static', uploaded_file.filename)
-        # uploaded_file.save(filepath)
         
         #Get Bet1 and bank_roll inputs and dump
         #into json for later use
@@ -56,12 +54,10 @@ def get_inputs():
         
         df.to_csv('app/static/nightly_EVs.csv', index=None)
         
-        
-        
-        daily_file = mdf.make_full_daily_file()
-        daily_file.to_csv('app/static/daily_file.csv', index=None)
-        
         return redirect(url_for('run_model'))
+    
+    daily_file = mdf.make_full_daily_file()
+    daily_file.to_csv('app/static/daily_file.csv', index=None)
     return render_template('index.html')
 
 
@@ -80,8 +76,6 @@ def run_model():
 
         output = main.get_EV(bet1, bank_roll, daily_file, prob_win_dict)
         
-        # significant_EVs = output[~output.loc[:,'lower tier team':].applymap(np.isreal).all(1)]
-        # night_EVs = night_EVs.append(significant_EVs, ignore_index=True, sort=False)
         night_EVs = night_EVs.append(output, ignore_index=True, sort=False)
         night_EVs.to_csv('app/static/nightly_EVs.csv', index=None)
         return render_template('output.html', output=output.to_html(index=False), night_EVs = night_EVs.to_html(index=False))

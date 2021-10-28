@@ -17,9 +17,11 @@ def get_portal_odds():
     options.add_argument('headless')
     options.add_argument('--disable-gpu')
     options.add_argument('--no-sandbox')
-    options.binary_location = os.environ['GOOGLE_CHROME_BIN']
+    # options.binary_location = os.environ['GOOGLE_CHROME_BIN']
+    options.binary_location = 'C:/Program Files (x86)/Google/Chrome/Application/chrome.exe'
 
-    driver = webdriver.Chrome(options=options, executable_path=os.environ['CHROMEDRIVER_PATH'])
+    driver = webdriver.Chrome(options=options, executable_path='C:/Users/joshu/Documents/py_projects/NBA-Model/old/chromedriver.exe')
+    # driver = webdriver.Chrome(options=options, executable_path=os.environ['CHROMEDRIVER_PATH'])
     driver.get('https://www.oddsportal.com/basketball/usa/nba/')   
     
     
@@ -28,7 +30,7 @@ def get_portal_odds():
     driver.find_element(By.XPATH, '//*[@id="user-header-oddsformat"]/li[3]/a').click()
     time.sleep(1.5)
     driver.find_element(By.XPATH, '//*[@id="user-header-timezone-expander"]').click()
-    time.sleep(1)
+    time.sleep(1.5)
     driver.find_element(By.XPATH, '//*[@id="timezone-content"]/a[40]').click()
 
     
@@ -36,7 +38,7 @@ def get_portal_odds():
     
     df = pd.DataFrame(columns=['lower tier team', 'higher tier team', 'oddsB lower tier', 'oddsB higher tier'])
     
-    for i in range(25):
+    for i in range(4, 14):
         try:
             teams = driver.find_element(By.XPATH, '//*[@id="tournamentTable"]/tbody/tr[{}]/td[2]/a[2]'.format(i)).text.split(' - ')
             team1, team2 = teams[0], teams[1]
@@ -45,7 +47,13 @@ def get_portal_odds():
             
             df = df.append({'lower tier team': team1, 'higher tier team':team2, 'oddsB lower tier':odds1, 'oddsB higher tier':odds2}, ignore_index=True)
         except:
-            continue
+            teams = driver.find_element(By.XPATH, '//*[@id="tournamentTable"]/tbody/tr[{}]/td[2]/a[2]'.format(i)).text.split(' - ')
+            team1, team2 = teams[0], teams[1]
+            odds1 = driver.find_element(By.XPATH,'//*[@id="tournamentTable"]/tbody/tr[{}]/td[4]/a'.format(i)).text
+            odds2 = driver.find_element(By.XPATH,'//*[@id="tournamentTable"]/tbody/tr[{}]/td[5]/a'.format(i)).text
+            
+            df = df.append({'lower tier team': team1, 'higher tier team':team2, 'oddsB lower tier':odds1, 'oddsB higher tier':odds2}, ignore_index=True)
+
         
     for row in range(len(df)):
         if df['oddsB lower tier'].iloc[row] > df['oddsB higher tier'].iloc[row]:

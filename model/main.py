@@ -1,21 +1,11 @@
 import pandas as pd
-import numpy as np
-import time
 import datetime
 from pytz import timezone
-from fractions import Fraction
-import scipy.io
-import requests
 import json
 import os
-import gspread
-
-#import config file
-# import model.config as config
 
 #import functions from utils
 from model.utils import request_game_stats
-from model.utils import convert_time
 from model.utils import parse_game_stats
 from model.utils import request_game_odds
 from model.utils import parse_odds
@@ -32,7 +22,6 @@ def get_EV(bet1, bank_roll, daily_file, prob_win_dict):
 ######################GAME STATS FOR EACH GAME################################
     tz = timezone('US/Eastern')
     current_time = datetime.datetime.now(tz).strftime('%Y/%m/%d %I:%M:%S')
-    # game_info_dict = request_game_stats(config.STATS_API_KEY)
     game_info_dict = request_game_stats(os.environ['STATS_API_KEY'])
     
     
