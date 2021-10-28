@@ -76,7 +76,7 @@ def get_EV(bet1, bank_roll, daily_file, prob_win_dict):
 ######################CREATE MEDIAN DF TO BE USED LATER, OUTSIDE NEXT LOOP#####
 
     median_df = pd.DataFrame(columns=['Current Time', 'lower tier team', 'higher tier team','lower tier points', 'higher tier points',
-                                      'lower tier fractional', 'higher tier fractional','timeB', 'low_score',
+                                      'lower tier fractional', 'higher tier fractional','time_sec', 'low_score',
                           'EV_low_tier', 'EV_higher_tier', 'oddsB lower tier ML', 'oddsB higher tier ML', 'probability', 'kelly'])
 
 ######################FILTER DAILY FILE#######################################
@@ -169,7 +169,7 @@ def get_EV(bet1, bank_roll, daily_file, prob_win_dict):
 #####################FINAL DATAFRAME ##########################################
         EV_df_over20 = EV_final_full[(EV_final_full['EV_low_tier'].between(20,100)) | (EV_final_full['EV_higher_tier'].between(20,100))]
         relevant_feats = ['Current Time','lower tier team', 'higher tier team','lower tier points', 'higher tier points',
-                          'lower tier fractional', 'higher tier fractional','timeB', 'low_score',
+                          'lower tier fractional', 'higher tier fractional','time_sec', 'low_score',
                           'EV_low_tier', 'EV_higher_tier', 'oddsB lower tier ML', 'oddsB higher tier ML', 'probability', 'kelly']
         EV_df_over20 = EV_df_over20[relevant_feats]
         EV_final_full = EV_final_full[relevant_feats]

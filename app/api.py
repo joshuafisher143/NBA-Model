@@ -55,9 +55,6 @@ def get_inputs():
         df.to_csv('app/static/nightly_EVs.csv', index=None)
         
         return redirect(url_for('run_model'))
-    
-    daily_file = mdf.make_full_daily_file()
-    daily_file.to_csv('app/static/daily_file.csv', index=None)
     return render_template('index.html')
 
 
@@ -79,6 +76,8 @@ def run_model():
         night_EVs = night_EVs.append(output, ignore_index=True, sort=False)
         night_EVs.to_csv('app/static/nightly_EVs.csv', index=None)
         return render_template('output.html', output=output.to_html(index=False), night_EVs = night_EVs.to_html(index=False))
+    daily_file = mdf.make_full_daily_file()
+    daily_file.to_csv('app/static/daily_file.csv', index=None)
     return render_template('output.html')
 
 @app.route('/remove/')
