@@ -18,12 +18,12 @@ from model.utils import get_median_EV
 from model.utils import pd_to_gs
 
 
-def get_EV(bet1, bank_roll, daily_file, prob_win_dict):   
+def get_EV(bet1, bank_roll, prob_win_dict):   
 ######################GAME STATS FOR EACH GAME################################
     tz = timezone('US/Eastern')
     current_time = datetime.datetime.now(tz).strftime('%Y/%m/%d %I:%M:%S')
+
     game_info_dict = request_game_stats(os.environ['STATS_API_KEY'])
-    
     
     #make empty dataframe to append the stats data to for each game
     game_df = pd.DataFrame(columns = ['GameID', 'Home_Team', 'Away_Team','Home_Points', 'Away_Points',
@@ -69,7 +69,7 @@ def get_EV(bet1, bank_roll, daily_file, prob_win_dict):
     gs_credentials = os.environ['GOOGLE_CREDENTIALS']
     gs_credentials_data = json.loads(gs_credentials, strict=False)
     
-    pd_to_gs(live_df, 'Datafeeds', gs_credentials_data)
+    pd_to_gs(live_df.reset_index(), 'Datafeeds', gs_credentials_data)
 
 
 
@@ -83,7 +83,8 @@ def get_EV(bet1, bank_roll, daily_file, prob_win_dict):
 
     for game in live_df.index:
         try:
-            dfile = pd.read_csv(daily_file)
+            dfile = pd.read_csv('app/static/daily_file.csv')
+    
             daily_file_filtered = dfile[dfile['time_sec'] > live_df['Time_elapsed'].loc[game]]
             #filter out teams that don't relate to current looped index
             df_filt_oneT = daily_file_filtered.loc[(daily_file_filtered['lower tier team'] == live_df['Home_Team'].loc[game]) | (daily_file_filtered['higher tier team'] == live_df['Home_Team'].loc[game]),:]
@@ -108,15 +109,16 @@ def get_EV(bet1, bank_roll, daily_file, prob_win_dict):
             #Empty dataframe for EV calculations
             ev_out_df = pd.DataFrame(columns=['index', 'EV_low_tier', 'EV_higher_tier',
                                               'future_time_block', 'oddsB lower tier ML',
-                                              'oddsB higher tier ML', 'probability',' kelly'])
+                                              'oddsB higher tier ML', 'probability','kelly'])
             
             
             for ind in final_df.index:
                 oddsB_low = final_df['oddsB lower tier'].iloc[ind]                
                 oddsB_high = final_df['oddsB higher tier'].iloc[ind]
-                
-                prob_win, future_time = get_probabilities(final_df, ind, prob_win_dict, score_diff, tier_matchup, oddsB_low, oddsB_high)
-                
+                try:
+                    prob_win, future_time = get_probabilities(final_df, ind, prob_win_dict, score_diff, tier_matchup, oddsB_low, oddsB_high)
+                except:
+                    continue
     #######################CALCULATE EV AND KELLY FOR LOWER TIER TEAM##############              
                 if final_df['Home_Team'].iloc[ind] == final_df['lower tier team'].iloc[ind]:
                     EV_low = calculate_EV(final_df, 'Home_fractional', ind, bet1, bank_roll, prob_win, oddsB_high)
@@ -150,46 +152,48 @@ def get_EV(bet1, bank_roll, daily_file, prob_win_dict):
                             'oddsB lower tier ML':oddsB_low, 'oddsB higher tier ML':oddsB_high, 
                             'probability':prob_win,'kelly':kelly}]
                 ev_out_df = ev_out_df.append(ev_data, ignore_index=True, sort=False)
+
+
+
+            EV_final_full = final_df.merge(ev_out_df, left_index=True, right_on='index')
+        
+        
+            #rename columns for easier understanding
+            if EV_final_full['Home_Team'].iloc[0] == EV_final_full['lower tier team'].iloc[0]:
+                EV_final_full = EV_final_full.rename(columns={'Home_Points':'lower tier points', 'Away_Points': 'higher tier points',
+                                              'Home_fractional':'lower tier fractional', 'Away_fractional':'higher tier fractional'})
+            else:
+                EV_final_full = EV_final_full.rename(columns={'Home_Points':'higher tier points', 'Away_Points': 'lower tier points',
+                                              'Home_fractional':'higher tier fractional', 'Away_fractional':'lower tier fractional'})
+                
+                
+        #####################FINAL DATAFRAME ##########################################
+            EV_df_over20 = EV_final_full[(EV_final_full['EV_low_tier'].between(20,100)) | (EV_final_full['EV_higher_tier'].between(20,100))]
+            relevant_feats = ['Current Time','lower tier team', 'higher tier team','lower tier points', 'higher tier points',
+                              'lower tier fractional', 'higher tier fractional','time_sec', 'low_score',
+                              'EV_low_tier', 'EV_higher_tier', 'oddsB lower tier ML', 'oddsB higher tier ML', 'probability', 'kelly']
+            EV_df_over20 = EV_df_over20[relevant_feats]
+            EV_final_full = EV_final_full[relevant_feats]
+            
+        ####################ISOLATE MEDIAN EV FOR EACH TIER###########################
+            try:
+                median_df = median_df.append(get_median_EV(EV_df_over20, median_df, 'EV_low_tier'), ignore_index=True)
+            except:
+                max_low_EV = EV_final_full[EV_final_full['EV_low_tier'] == EV_final_full['EV_low_tier'].max()].iloc[0]
+                median_df = median_df.append(max_low_EV, ignore_index=True)
+            try:
+                median_df = median_df.append(get_median_EV(EV_df_over20, median_df, 'EV_higher_tier'), ignore_index=True)
+            except:
+                max_high_EV = EV_final_full[EV_final_full['EV_higher_tier'] == EV_final_full['EV_higher_tier'].max()].iloc[0]
+                median_df = median_df.append(max_high_EV, ignore_index=True)
+            
+        
+            pd_to_gs(median_df, 'Output_Log', gs_credentials_data)
+        
+            
+            median_df = median_df.drop_duplicates()
         except:
+            print('Error with the game')
             continue
-
-
-        EV_final_full = final_df.merge(ev_out_df, left_index=True, right_on='index')
-
-
-        #rename columns for easier understanding
-        if EV_final_full['Home_Team'].iloc[0] == EV_final_full['lower tier team'].iloc[0]:
-            EV_final_full = EV_final_full.rename(columns={'Home_Points':'lower tier points', 'Away_Points': 'higher tier points',
-                                          'Home_fractional':'lower tier fractional', 'Away_fractional':'higher tier fractional'})
-        else:
-            EV_final_full = EV_final_full.rename(columns={'Home_Points':'higher tier points', 'Away_Points': 'lower tier points',
-                                          'Home_fractional':'higher tier fractional', 'Away_fractional':'lower tier fractional'})
-            
-            
-#####################FINAL DATAFRAME ##########################################
-        EV_df_over20 = EV_final_full[(EV_final_full['EV_low_tier'].between(20,100)) | (EV_final_full['EV_higher_tier'].between(20,100))]
-        relevant_feats = ['Current Time','lower tier team', 'higher tier team','lower tier points', 'higher tier points',
-                          'lower tier fractional', 'higher tier fractional','time_sec', 'low_score',
-                          'EV_low_tier', 'EV_higher_tier', 'oddsB lower tier ML', 'oddsB higher tier ML', 'probability', 'kelly']
-        EV_df_over20 = EV_df_over20[relevant_feats]
-        EV_final_full = EV_final_full[relevant_feats]
-        
-####################ISOLATE MEDIAN EV FOR EACH TIER###########################
-        try:
-            median_df = median_df.append(get_median_EV(EV_df_over20, median_df, 'EV_low_tier'), ignore_index=True)
-        except:
-            max_low_EV = EV_final_full[EV_final_full['EV_low_tier'] == EV_final_full['EV_low_tier'].max()].iloc[0]
-            median_df = median_df.append(max_low_EV, ignore_index=True)
-        try:
-            median_df = median_df.append(get_median_EV(EV_df_over20, median_df, 'EV_higher_tier'), ignore_index=True)
-        except:
-            max_high_EV = EV_final_full[EV_final_full['EV_higher_tier'] == EV_final_full['EV_higher_tier'].max()].iloc[0]
-            median_df = median_df.append(max_high_EV, ignore_index=True)
-        
-
-        pd_to_gs(median_df, 'Output_Log', gs_credentials_data)
-
-        
-        median_df = median_df.drop_duplicates()
 
     return median_df

@@ -16,7 +16,7 @@ def get_portal_odds():
     options = webdriver.ChromeOptions()
     options.add_argument('headless')
     options.add_argument('--disable-gpu')
-    options.add_argument('--no-sandbox')
+    # options.add_argument('--no-sandbox')
     options.binary_location = os.environ['GOOGLE_CHROME_BIN']
     # options.binary_location = 'C:/Program Files (x86)/Google/Chrome/Application/chrome.exe'
 
@@ -24,37 +24,43 @@ def get_portal_odds():
     driver = webdriver.Chrome(options=options, executable_path=os.environ['CHROMEDRIVER_PATH'])
     driver.get('https://www.oddsportal.com/basketball/usa/nba/')   
     
-    
-    time.sleep(1)
-    driver.find_element(By.XPATH, '//*[@id="user-header-oddsformat-expander"]').click()
-    driver.find_element(By.XPATH, '//*[@id="user-header-oddsformat"]/li[3]/a').click()
-    time.sleep(1.5)
-    driver.find_element(By.XPATH, '//*[@id="user-header-timezone-expander"]').click()
-    time.sleep(1.5)
-    driver.find_element(By.XPATH, '//*[@id="timezone-content"]/a[40]').click()
-
-    
-
+    result=None
+    while result is None:
+        try:
+            time.sleep(1.5)
+            driver.find_element(By.XPATH, '//*[@id="user-header-oddsformat-expander"]').click()
+            time.sleep(1.5)
+            driver.find_element(By.XPATH, '//*[@id="user-header-oddsformat"]/li[3]/a').click()
+            time.sleep(1.5)
+            driver.find_element(By.XPATH, '//*[@id="user-header-timezone-expander"]').click()
+            time.sleep(1.5)
+            driver.find_element(By.XPATH, '//*[@id="timezone-content"]/a[40]').click()
+            result = True
+        except:
+            print('Trying again')
+            pass
     
     df = pd.DataFrame(columns=['lower tier team', 'higher tier team', 'oddsB lower tier', 'oddsB higher tier'])
     
     for i in range(4, 14):
         try:
-            teams = driver.find_element(By.XPATH, '//*[@id="tournamentTable"]/tbody/tr[{}]/td[2]/a[2]'.format(i)).text.split(' - ')
-            team1, team2 = teams[0], teams[1]
-            odds1 = driver.find_element(By.XPATH,'//*[@id="tournamentTable"]/tbody/tr[{}]/td[3]/a'.format(i)).text
-            odds2 = driver.find_element(By.XPATH,'//*[@id="tournamentTable"]/tbody/tr[{}]/td[4]/a'.format(i)).text
-            
-            df = df.append({'lower tier team': team1, 'higher tier team':team2, 'oddsB lower tier':odds1, 'oddsB higher tier':odds2}, ignore_index=True)
+            try:
+                teams = driver.find_element(By.XPATH, '//*[@id="tournamentTable"]/tbody/tr[{}]/td[2]/a[2]'.format(i)).text.split(' - ')
+                team1, team2 = teams[0], teams[1]
+                odds1 = driver.find_element(By.XPATH,'//*[@id="tournamentTable"]/tbody/tr[{}]/td[3]/a'.format(i)).text
+                odds2 = driver.find_element(By.XPATH,'//*[@id="tournamentTable"]/tbody/tr[{}]/td[4]/a'.format(i)).text
+                
+                df = df.append({'lower tier team': team1, 'higher tier team':team2, 'oddsB lower tier':odds1, 'oddsB higher tier':odds2}, ignore_index=True)
+            except:
+                teams = driver.find_element(By.XPATH, '//*[@id="tournamentTable"]/tbody/tr[{}]/td[2]/a[2]'.format(i)).text.split(' - ')
+                team1, team2 = teams[0], teams[1]
+                odds1 = driver.find_element(By.XPATH,'//*[@id="tournamentTable"]/tbody/tr[{}]/td[4]/a'.format(i)).text
+                odds2 = driver.find_element(By.XPATH,'//*[@id="tournamentTable"]/tbody/tr[{}]/td[5]/a'.format(i)).text
+                
+                df = df.append({'lower tier team': team1, 'higher tier team':team2, 'oddsB lower tier':odds1, 'oddsB higher tier':odds2}, ignore_index=True)
         except:
-            teams = driver.find_element(By.XPATH, '//*[@id="tournamentTable"]/tbody/tr[{}]/td[2]/a[2]'.format(i)).text.split(' - ')
-            team1, team2 = teams[0], teams[1]
-            odds1 = driver.find_element(By.XPATH,'//*[@id="tournamentTable"]/tbody/tr[{}]/td[4]/a'.format(i)).text
-            odds2 = driver.find_element(By.XPATH,'//*[@id="tournamentTable"]/tbody/tr[{}]/td[5]/a'.format(i)).text
-            
-            df = df.append({'lower tier team': team1, 'higher tier team':team2, 'oddsB lower tier':odds1, 'oddsB higher tier':odds2}, ignore_index=True)
-        else:
             continue
+    driver.close()
         
     for row in range(len(df)):
         if df['oddsB lower tier'].iloc[row] > df['oddsB higher tier'].iloc[row]:
@@ -130,7 +136,7 @@ def make_one_team_daily_file(team_odds):
     higher_tier_SO_perc = odds_to_decimal(oddsB_higher_tier)
     
     for row in range(len(df)):
-        oddsB_lower_tier_fractional, oddsB_higher_tier_fractional = calculate_daily(lower_tier_SO_perc, higher_tier_SO_perc, df['time_sec'].iloc[row], df['score'].iloc[row])
+        oddsB_lower_tier_fractional, oddsB_higher_tier_fractional = calculate_daily(lower_tier_SO_perc, higher_tier_SO_perc, df['time_sec'].iloc[row], df['low_score'].iloc[row])
         df['oddsB lower tier'].iloc[row] = oddsB_lower_tier_fractional
         df['oddsB higher tier'].iloc[row] = oddsB_higher_tier_fractional
     
@@ -141,12 +147,11 @@ def make_full_daily_file():
     team_odds = get_portal_odds()
     
     final_daily_file = pd.DataFrame(columns=['lower tier team', 'higher tier team', 'lower tier', 'higher tier',
-           'score', 'time_sec', 'oddsB lower tier', 'oddsB higher tier'])
+           'low_score', 'time_sec', 'oddsB lower tier', 'oddsB higher tier'])
     
     for row in team_odds.index:
         df = make_one_team_daily_file(team_odds.iloc[row])
-        final_daily_file = final_daily_file.append(df, ignore_index=True)
-        
+        final_daily_file = final_daily_file.append(df, ignore_index=True)   
     return final_daily_file
         
     

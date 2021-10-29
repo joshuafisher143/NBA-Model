@@ -14,10 +14,8 @@ path = os.path.abspath(os.path.join('.'))
 if path not in sys.path:
     sys.path.append(path)
 
-# import model.config as config
 import model.main as main
 import pandas as pd
-import numpy as np
 import json
 import model.make_daily_file as mdf
 
@@ -25,12 +23,6 @@ import model.make_daily_file as mdf
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'something only you know'
 
-'''
-Load file
-
-prob_win_dict - nested dictionary that contains historical game score-time probabilities
-
-'''
 prob_win_dict = pd.read_pickle('small_prob_dist.pkl')
 
 
@@ -49,11 +41,13 @@ def get_inputs():
             json.dump(form_data, f)
             
         df = pd.DataFrame(columns=['Current Time','lower tier team', 'higher tier team','lower tier points', 'higher tier points',
-                          'lower tier fractional', 'higher tier fractional','timeB', 'low_score', 'EV_low_tier',
+                          'lower tier fractional', 'higher tier fractional','time_sec', 'low_score', 'EV_low_tier',
                           'EV_higher_tier', 'oddsB lower tier ML', 'oddsB higher tier ML', 'probability', 'kelly'])
         
         df.to_csv('app/static/nightly_EVs.csv', index=None)
-        
+        daily_file = mdf.make_full_daily_file()
+        daily_file.to_csv('app/static/daily_file.csv', index=None)
+
         return redirect(url_for('run_model'))
     return render_template('index.html')
 
@@ -61,23 +55,22 @@ def get_inputs():
 @app.route('/run_model', methods=['GET', 'POST'])
 def run_model():
     if request.method == 'POST':
+        
         with open('app/static/inputs.json') as f:
             data = json.load(f)
             
         bet1 = int(data['bet1'])
         bank_roll = int(data['bank_roll'])
         
-        daily_file = 'app/static/daily_file.csv'
-        
         night_EVs = pd.read_csv('app/static/nightly_EVs.csv')
 
-        output = main.get_EV(bet1, bank_roll, daily_file, prob_win_dict)
+        output = main.get_EV(bet1, bank_roll, prob_win_dict)
+        print('output')
+        print(output.head())
         
         night_EVs = night_EVs.append(output, ignore_index=True, sort=False)
         night_EVs.to_csv('app/static/nightly_EVs.csv', index=None)
         return render_template('output.html', output=output.to_html(index=False), night_EVs = night_EVs.to_html(index=False))
-    daily_file = mdf.make_full_daily_file()
-    daily_file.to_csv('app/static/daily_file.csv', index=None)
     return render_template('output.html')
 
 @app.route('/remove/')
