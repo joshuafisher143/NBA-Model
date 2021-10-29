@@ -16,7 +16,7 @@ def get_portal_odds():
     options = webdriver.ChromeOptions()
     options.add_argument('headless')
     options.add_argument('--disable-gpu')
-    # options.add_argument('--no-sandbox')
+    options.add_argument('--no-sandbox')
     options.binary_location = os.environ['GOOGLE_CHROME_BIN']
     # options.binary_location = 'C:/Program Files (x86)/Google/Chrome/Application/chrome.exe'
 
