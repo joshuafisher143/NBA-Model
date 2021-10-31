@@ -99,7 +99,7 @@
 <div class="buttons">
     <input type = "button" class="start_button button--loading" id="start_button" name="start" value="Start Model">
     <div class="load"> </div>
-    <span class = "timer_box" id = "timer_box" >Next Output in  : 64 seconds</span>
+    <span class = "timer_box" id = "timer_box" >Next Output in  : 54 seconds</span>
     <a href="/remove">
         <input type = "button" id="stop_button" value="Stop Model">
     </a>
@@ -119,7 +119,7 @@
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
 <script>
     document.getElementById('start_button').addEventListener('click',startTimer);
-    let incomeTicker = 64;
+    let incomeTicker = 54;
 
     function startTimer(){
         window.setInterval(function(){
@@ -127,7 +127,7 @@
                 incomeTicker--;
             document.getElementById("timer_box").innerHTML = "Next Output in  : " + incomeTicker + " seconds";
             if (incomeTicker <= 0)
-                incomeTicker = 64;
+                incomeTicker = 54;
         }, 1000);
     }
 
