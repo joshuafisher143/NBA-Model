@@ -82,11 +82,11 @@ def get_portal_odds():
 
 def calculate_daily(lower_tier_SO_perc, higher_tier_SO_perc, time_sec, score_diff):
 
-    oddsB_lower_tier=(math.exp(-1.752+(0.00017603*time_sec)+(0.10595*score_diff)+3.2041*lower_tier_SO_perc))/(1+math.exp(-1.752+(0.00017603*time_sec)+(0.10595*score_diff)+3.2041*lower_tier_SO_perc))
+    oddsB_lower_tier=(math.exp(-1.8635+(0.00018843*time_sec)+(0.10366*score_diff)+3.4324*lower_tier_SO_perc))/(1+math.exp(-1.8635+(0.00018843*time_sec)+(0.10366*score_diff)+3.4324*lower_tier_SO_perc))
     oddsB_lower_tier_fractional = (1/oddsB_lower_tier) - 1
     
     
-    oddsB_higher_tier = (math.exp(-1.5525-(0.00014773*time_sec)+(0.11327*(score_diff*-1))+3.59272*higher_tier_SO_perc))/(1+math.exp(-1.5525-(0.00014773*time_sec)+(0.11327*(score_diff*-1))+3.59272*higher_tier_SO_perc))
+    oddsB_higher_tier = (math.exp(-1.77-(0.00012557*time_sec)+(0.11173*(score_diff*-1))+3.9179*higher_tier_SO_perc))/(1+math.exp(-1.77-(0.00012557*time_sec)+(0.11173*(score_diff*-1))+3.9179*higher_tier_SO_perc))
     oddsB_higher_tier_fractional = (1/oddsB_higher_tier) - 1
     
     return oddsB_lower_tier_fractional, oddsB_higher_tier_fractional
