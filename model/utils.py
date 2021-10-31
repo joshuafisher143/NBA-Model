@@ -126,7 +126,7 @@ def get_probabilities(final_df, ind, lvh_count_dict, score_diff, tier_matchup, o
     future_score = final_df['low_score'].iloc[ind]
     if lvh_count_dict[tier_matchup][time_score][str(future_time)][str(future_score)][0] > 49:
         lvh_prob_win_dist = lvh_count_dict[tier_matchup][time_score][str(future_time)].copy()
-        lvh_prob_win_dist.loc[:,'-60':'59'] = lvh_prob_win_dist.div(lvh_prob_win_dist.sum(axis=1)[0], axis=0)
+        lvh_prob_win_dist.loc[:,'-40':'39'] = lvh_prob_win_dist.div(lvh_prob_win_dist.sum(axis=1)[0], axis=0)
         if score_diff < future_score:
             prob_win = lvh_prob_win_dist.loc[:,str(future_score):].sum(axis=1)[0]
             
