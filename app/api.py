@@ -23,7 +23,7 @@ import model.make_daily_file as mdf
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'something only you know'
 
-prob_win_dict = pd.read_pickle('small_prob_dist.pkl')
+prob_win_dict = pd.read_pickle('probability_distributions_condensed.pkl')
 
 
 @app.route('/', methods=['POST', 'GET'])
