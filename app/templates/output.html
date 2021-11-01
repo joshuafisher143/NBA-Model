@@ -93,18 +93,7 @@
             font-weight: bold;
             font-size: 18pt;
         }
-        .dataframe td.positive { color : green; }
     </style>
-
-    <script>
-        function MakeNegative() {
-            let TDs = document.getElementsByTagName('td');
-            for (let i=0; i<TDs.length; i++) {
-                let temp = TDs[i];
-                if (temp.firstChild.nodeValue.indexOf('-') != 0) temp.className = "positive";
-            }
-        }
-    </script>
 </head>
 <body>
 <div class="buttons">
@@ -177,7 +166,6 @@
         $('.load').addClass('loading');
         $('#timer_box').show().css('display', 'inline-block');
     });
-    MakeNegative();
 </script>
 </body>
 <footer>

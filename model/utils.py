@@ -185,9 +185,12 @@ def pd_to_gs(df, worksheet, gs_credentials):
     
     
     
-    
-    
-    
+def color_positive_green(value):
+    if value > 0:
+        color = 'yellow'
+    else:
+        color = 'white'
+    return 'background-color: %s' % color
     
     
     
