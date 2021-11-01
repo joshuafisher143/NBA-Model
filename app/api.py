@@ -69,14 +69,15 @@ def run_model():
         print('output')
         print(output.head())
         
+        night_EVs = night_EVs.append(output, ignore_index=True, sort=False)
+        night_EVs.to_csv('app/static/nightly_EVs.csv', index=None)
+        
         output = output.style.applymap(color_positive_green, subset=pd.IndexSlice[:, ['EV_low_tier', 'EV_higher_tier']]).hide_index().render()
         
-        night_EVs = night_EVs.append(output, ignore_index=True, sort=False)
-        night_EVs.to_csv('app/static/nightly_EVs.csv', index=None)        
+        
         night_EVs = night_EVs.style.applymap(color_positive_green, subset=pd.IndexSlice[:, ['EV_low_tier', 'EV_higher_tier']]).hide_index().render()
 
         return render_template('output.html', output=output, night_EVs = night_EVs)
-        # return render_template('output.html', output=output.to_html(index=False), night_EVs = night_EVs.to_html(index=False))
     return render_template('output.html')
 
 @app.route('/remove/')
