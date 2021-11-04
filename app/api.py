@@ -24,7 +24,7 @@ from model.utils import color_positive_green
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'something only you know'
 
-prob_win_dict = pd.read_pickle('probability_distributions_condensed.pkl')
+prob_win_dict = pd.read_pickle('probability_distributions_condensed_V2.pkl')
 
 
 @app.route('/', methods=['POST', 'GET'])
