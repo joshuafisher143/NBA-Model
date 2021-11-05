@@ -87,7 +87,7 @@ def get_EV(bet1, bank_roll, prob_win_dict):
     
             daily_file_filtered = dfile[dfile['time_sec'] > live_df['Time_elapsed'].loc[game]]
             #filter out teams that don't relate to current looped index
-            df_filt_oneT = daily_file_filtered.loc[(daily_file_filtered['lower tier team'] == live_df['Home_Team'].loc[game]) | (daily_file_filtered['higher tier team'] == live_df['Home_Team'].loc[game]),:]
+            df_filt_oneT = daily_file_filtered.loc[((daily_file_filtered['lower tier team'] == live_df['Home_Team'].loc[game]) & (daily_file_filtered['higher tier team'] == live_df['Away_Team'].loc[game])) | ((daily_file_filtered['higher tier team'] == live_df['Home_Team'].loc[game]) & (daily_file_filtered['lower tier team'] == live_df['Away_Team'].loc[game])),:]
             if len(df_filt_oneT) < 1:
                 continue
             #merge the filtered daily file and the live_df
