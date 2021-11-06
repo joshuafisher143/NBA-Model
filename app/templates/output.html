@@ -22,7 +22,7 @@
             font-size: 18pt;
             display: inline-block;
         }
-        .buttons, .timer_box {
+        .buttons {
             text-align: center;
             margin: 24px 50px 12px;
         }
@@ -31,14 +31,11 @@
         }
         table {
             border-radius: 5px;
-            /*font-size: 8pt;*/
             font-weight: normal;
             border: none;
             border-collapse: collapse;
             width: 100%;
             height: 75%;
-            /*max-width: 100%;*/
-            /*white-space: nowrap;*/
             background-color: white;
             table-layout: fixed;
         }
@@ -66,40 +63,37 @@
             background: black;
         }
         .loading:after {
-            content: "Running Model";
-            background-color: firebrick;
-            color: white;
-            /*padding: 14px 0;*/
-            padding: 14px 0;
-            margin: 10px 0;
             border: 2px solid black;
             cursor: grab;
             width: 30%;
-            font-weight: bold;
-            font-size: 18pt;
             display: inline-block;
-            text-align: center;
-            /*margin: 24px 50px 12px;*/
         }
         #timer_box {
             display: none;
-            background-color: #003DA5;
-            color: white;
-            padding: 14px 0;
-            margin: 10px 0;
+            background-color: firebrick;
+            background-image: url('../static/spinner.svg');
+            background-size: 50px 50px;
+            background-position:right;
+            background-repeat: no-repeat;
+            padding: 10px 0;
             border: 2px solid black;
             cursor: grab;
             width: 30%;
             font-weight: bold;
             font-size: 18pt;
+            color: white;
+            text-align: center;
+            margin: 0 auto;
         }
     </style>
 </head>
 <body>
 <div class="buttons">
     <input type = "button" class="start_button button--loading" id="start_button" name="start" value="Start Model">
-    <div class="load"> </div>
-    <span class = "timer_box" id = "timer_box" >Next Output in  : 61 seconds</span>
+    <div class="load">
+        <span class = "timer_box" id = "timer_box" >Running Model</span>
+    </div>
+
     <a href="/remove">
         <input type = "button" id="stop_button" value="Stop Model">
     </a>
@@ -118,20 +112,6 @@
 
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
 <script>
-    document.getElementById('start_button').addEventListener('click',startTimer);
-    let incomeTicker = 61;
-
-    function startTimer(){
-        window.setInterval(function(){
-            if (incomeTicker > 0)
-                incomeTicker--;
-            document.getElementById("timer_box").innerHTML = "Next Output in  : " + incomeTicker + " seconds";
-            if (incomeTicker <= 0)
-                incomeTicker = 61;
-        }, 1000);
-    }
-
-
     document.getElementById('start_button').addEventListener('click',StartFunction);
     document.getElementById('stop_button').addEventListener('click',StopFunction);
 
