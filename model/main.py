@@ -168,8 +168,9 @@ def get_EV(bet1, bank_roll, prob_win_dict):
                 
                 
         #####################FINAL DATAFRAME ##########################################
+            EV_final_full = EV_final_full[EV_final_full['time_sec'] < 2600]
             EV_df_over20 = EV_final_full[(EV_final_full['EV_low_tier'].between(20,100)) | (EV_final_full['EV_higher_tier'].between(20,100))]
-            EV_df_over20 = EV_df_over20[EV_df_over20['time_sec'] < 2580]
+            
             relevant_feats = ['Current Time','lower tier team', 'higher tier team','lower tier points', 'higher tier points',
                               'lower tier fractional', 'higher tier fractional','time_sec', 'low_score',
                               'EV_low_tier', 'EV_higher_tier', 'oddsB lower tier ML', 'oddsB higher tier ML', 'probability', 'kelly']

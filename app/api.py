@@ -27,6 +27,12 @@ app.config['SECRET_KEY'] = 'something only you know'
 prob_win_dict = pd.read_pickle('probability_distributions_condensed_V2.pkl')
 
 
+@app.before_first_request
+def daily_file_before_request():
+    daily_file = mdf.make_full_daily_file()
+    daily_file.to_csv('app/static/daily_file.csv', index=None)
+    print('daily file made and saved')
+
 @app.route('/', methods=['POST', 'GET'])
 def get_inputs():
     if request.method == 'POST':
@@ -46,8 +52,6 @@ def get_inputs():
                           'EV_higher_tier', 'oddsB lower tier ML', 'oddsB higher tier ML', 'probability', 'kelly'])
         
         df.to_csv('app/static/nightly_EVs.csv', index=None)
-        daily_file = mdf.make_full_daily_file()
-        daily_file.to_csv('app/static/daily_file.csv', index=None)
 
         return redirect(url_for('run_model'))
     return render_template('index.html')
