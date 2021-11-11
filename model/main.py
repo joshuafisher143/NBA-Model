@@ -3,6 +3,7 @@ import datetime
 from pytz import timezone
 import json
 import os
+import logging
 
 #import functions from utils
 from model.utils import request_game_stats
@@ -39,6 +40,7 @@ def get_EV(bet1, bank_roll, prob_win_dict):
             # game_df.append(parse_game_stats(game_info_dict, key))
             game_df = game_df.append(parse_game_stats(game_info_dict, key, current_time))
         except:
+            logging.exception('Could not parse stats for {}'.format(game_info_dict['data'][key]['description']))
             continue
 
 ######################GAME ODDS FOR EACH GAME#################################
@@ -56,6 +58,7 @@ def get_EV(bet1, bank_roll, prob_win_dict):
         try:
             odds_df = odds_df.append(parse_odds(key, go_dict))
         except:
+            logging.exception('Could not parse odds for {}'.format(go_dict['data'][key]['description']))
             continue
     
     odds_df = odds_df.drop_duplicates()
@@ -118,6 +121,7 @@ def get_EV(bet1, bank_roll, prob_win_dict):
                 try:
                     prob_win, future_time = get_probabilities(final_df, ind, prob_win_dict, score_diff, tier_matchup, oddsB_low, oddsB_high)
                 except:
+                    logging.exception('no probability for {} vs {}'.format(final_df['higher tier team'].iloc[ind], final_df['higher lower team'].iloc[ind]))
                     continue
     #######################CALCULATE EV AND KELLY FOR LOWER TIER TEAM##############              
                 if final_df['Home_Team'].iloc[ind] == final_df['lower tier team'].iloc[ind]:
@@ -196,6 +200,7 @@ def get_EV(bet1, bank_roll, prob_win_dict):
             median_df = median_df.drop_duplicates()
         except:
             print('Error with the game')
+            logging.exception('Could not calculate EV for game {}'.format(game))
             continue
 
     return median_df

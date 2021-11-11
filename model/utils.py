@@ -94,6 +94,9 @@ def parse_odds(key_2, go_dict):
                         Away_fractional = int(Away_ML) / 100
                     else:
                         Away_fractional = (-100) / int(Away_ML)
+                else:
+                    Home_fractional = 0
+                    Away_fractional = 0
 
     else:
         Home_fractional = 0
