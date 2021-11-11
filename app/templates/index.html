@@ -6,6 +6,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
 
+
+
     <style>
         html, body {
             display: flex;
@@ -20,6 +22,7 @@
         .form_container {
             text-align: center;
             margin: 24px 50px 12px;
+
         }
         .input_container {
             padding: 16px 0;
@@ -41,7 +44,7 @@
             cursor: grab;
             width: 48%;
         }
-        input[type=file], input[type=number] {
+        input[type=number] {
             width: 100%;
             padding: 16px 8px;
             margin: 8px 0;
@@ -51,16 +54,54 @@
             background-color: mintcream;
             font-weight: bold;
         }
+        input[type=button] {
+            background-color: #003DA5;
+            color: white;
+            padding: 14px 0;
+            margin: 10px 0;
+            border: 2px solid black;
+            cursor: grab;
+            width: 100%;
+            font-weight: bold;
+            font-size: 14pt;
+            display: inline-block;
+        }
+        .daily_file:active {
+            background: black;
+        }
+        .loading:after {
+            border: 2px solid black;
+            cursor: grab;
+            width: 100%;
+            display: inline-block;
+        }
+        #timer_box {
+            display: none;
+            background-color: firebrick;
+            padding: 14px 0;
+            border: 2px solid black;
+            cursor: grab;
+            width: 100%;
+            font-weight: bold;
+            font-size: 14pt;
+            color: white;
+            text-align: center;
+            margin: 10px 0;
+        }
     </style>
 </head>
 <body>
+
     <form class="" action="" method="post" enctype="multipart/form-data">
         <h1>NBA Model</h1>
         <div class="form_container">
             <div class="input_container">
-<!--                <label for="daily_file"><b>Daily File CSV</b></label>-->
-<!--                <input type="file" name="daily_file" id="daily_file" accept="csv" required> <br><br>-->
-<!--                <br>-->
+                <input type = "button" class="daily_file" id="daily_file" name="daily_file" value="Click Here to Make Daily File">
+                <div class="load">
+                    <span class = "timer_box" id = "timer_box" >Making Daily File. Wait for Alert</span>
+                </div>
+                <br>
+                <br><br>
                 <label for="bet1"><b>Bet Amount</b></label>
                 <input type="number" step="1" name="bet1" id="bet1" placeholder="Example: 100" required><br>
                 <br>
@@ -72,5 +113,35 @@
         </div>
 
     </form>
+
+    <br><br><br>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script>
+        document.getElementById('daily_file').addEventListener('click',StartFunction);
+
+        function StartFunction(){
+            MakeDailyFile(true);
+        }
+        function MakeDailyFile(start_var){
+            if (start_var) {
+                $.ajax({
+                    url: "/make_daily_file",
+                    type: "POST",
+                    contentType:"application/json",
+                    dataType:"json",
+                    success: function(data) {
+                        alert(data.response)
+                    }
+                })}}
+
+    $('#daily_file').on('click', function(){
+        $('#daily_file').hide();
+        $('.load').addClass('loading');
+        $('#timer_box').show().css('display', 'inline-block');
+    });
+    </script>
+
+
 </body>
 </html>

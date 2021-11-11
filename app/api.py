@@ -6,7 +6,7 @@ Created on Sun Sep 19 11:13:22 2021
 """
 
 from flask import Flask, request, \
-    render_template, redirect, url_for
+    render_template, redirect, url_for, jsonify
 import os
 import sys
 
@@ -23,15 +23,9 @@ from model.utils import color_positive_green
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'something only you know'
+# app.secret_key = 'secret key'
 
 prob_win_dict = pd.read_pickle('probability_distributions_condensed_V2.pkl')
-
-
-@app.before_first_request
-def daily_file_before_request():
-    daily_file = mdf.make_full_daily_file()
-    daily_file.to_csv('app/static/daily_file.csv', index=None)
-    print('daily file made and saved')
 
 @app.route('/', methods=['POST', 'GET'])
 def get_inputs():
@@ -55,6 +49,14 @@ def get_inputs():
 
         return redirect(url_for('run_model'))
     return render_template('index.html')
+
+@app.route('/make_daily_file', methods=['POST'])
+def daily_file_route():
+    if request.method == 'POST':
+        daily_file = mdf.make_full_daily_file()
+        daily_file.to_csv('app/static/daily_file.csv', index=None)
+
+        return jsonify({'response':'Daily File Created'})
 
 
 @app.route('/run_model', methods=['GET', 'POST'])

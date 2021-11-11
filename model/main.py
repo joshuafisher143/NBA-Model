@@ -25,6 +25,7 @@ def get_EV(bet1, bank_roll, prob_win_dict):
     current_time = datetime.datetime.now(tz).strftime('%Y/%m/%d %I:%M:%S')
 
     game_info_dict = request_game_stats(os.environ['STATS_API_KEY'])
+
     
     #make empty dataframe to append the stats data to for each game
     game_df = pd.DataFrame(columns = ['GameID', 'Home_Team', 'Away_Team','Home_Points', 'Away_Points',
@@ -45,6 +46,7 @@ def get_EV(bet1, bank_roll, prob_win_dict):
 
 ######################GAME ODDS FOR EACH GAME#################################
     go_dict = request_game_odds(os.environ['ODDS_API_KEY'])
+
 
     #make empty dataframe to append odds data to for each game
     odds_df = pd.DataFrame(columns = ['GameID', 'Home_fractional', 'Away_fractional'])
@@ -68,7 +70,7 @@ def get_EV(bet1, bank_roll, prob_win_dict):
     live_df = game_df.merge(odds_df, on=['GameID'])
     live_df = live_df.set_index('GameID')
     
-    # #save feed api to google sheet
+    # # #save feed api to google sheet
     gs_credentials = os.environ['GOOGLE_CREDENTIALS']
     gs_credentials_data = json.loads(gs_credentials, strict=False)
     

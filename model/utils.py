@@ -14,12 +14,13 @@ import requests
 import gspread
 
 
-
-
 #pull live game stats
 def request_game_stats(game_stats_feed_key):
     game_info = requests.get(game_stats_feed_key)
     game_info_dict = game_info.json()
+    
+    game_info_dict = [game_info_dict['data'][key] for key in range(len(game_info_dict['data'])) if datetime.datetime.strptime(game_info_dict['data'][key]['startDate'], '%Y-%m-%dT%H:%M:%SZ').date() == datetime.datetime.utcnow().date()]
+    game_info_dict = dict({'data': game_info_dict})
     
     return game_info_dict
 
@@ -74,6 +75,10 @@ def parse_game_stats(game_info_dict, key, current_time):
 def request_game_odds(game_odds_feed_key):
     game_info = requests.get(game_odds_feed_key)
     go_dict = game_info.json()
+    
+    go_dict = [go_dict['data'][key] for key in range(len(go_dict['data'])) if datetime.datetime.strptime(go_dict['data'][key]['startDate'], '%Y-%m-%dT%H:%M:%SZ').date() == datetime.datetime.utcnow().date()]
+    go_dict = dict({'data': go_dict})
+
     
     return go_dict
                 
