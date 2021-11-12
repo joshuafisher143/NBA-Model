@@ -145,7 +145,7 @@ def get_probabilities(final_df, ind, lvh_count_dict, score_diff, tier_matchup, o
         prob_win = 0
         prob_win = 0
         
-    return prob_win, future_time
+    return prob_win, future_time, future_score
     
 
 def calculate_kelly(prob_win, bank_roll):

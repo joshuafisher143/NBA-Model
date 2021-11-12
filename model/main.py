@@ -81,7 +81,7 @@ def get_EV(bet1, bank_roll, prob_win_dict):
 ######################CREATE MEDIAN DF TO BE USED LATER, OUTSIDE NEXT LOOP#####
 
     median_df = pd.DataFrame(columns=['Current Time', 'lower tier team', 'higher tier team','lower tier points', 'higher tier points',
-                                      'lower tier fractional', 'higher tier fractional','time_sec', 'low_score',
+                                      'lower tier fractional', 'higher tier fractional','time_sec', 'future_score',
                           'EV_low_tier', 'EV_higher_tier', 'oddsB lower tier ML', 'oddsB higher tier ML', 'probability', 'kelly'])
 
 ######################FILTER DAILY FILE#######################################
@@ -121,7 +121,7 @@ def get_EV(bet1, bank_roll, prob_win_dict):
                 oddsB_low = final_df['oddsB lower tier'].iloc[ind]                
                 oddsB_high = final_df['oddsB higher tier'].iloc[ind]
                 try:
-                    prob_win, future_time = get_probabilities(final_df, ind, prob_win_dict, score_diff, tier_matchup, oddsB_low, oddsB_high)
+                    prob_win, future_time, future_score = get_probabilities(final_df, ind, prob_win_dict, score_diff, tier_matchup, oddsB_low, oddsB_high)
                 except:
                     logging.exception('no probability for {} vs {}'.format(final_df['higher tier team'].iloc[ind], final_df['higher lower team'].iloc[ind]))
                     continue
@@ -142,7 +142,7 @@ def get_EV(bet1, bank_roll, prob_win_dict):
                 except:
                     kelly = 0
                 
-                if EV_high < 0:
+                if EV_high < 0 and EV_low < 0:
                     kelly = 0
                     
                     
@@ -153,10 +153,10 @@ def get_EV(bet1, bank_roll, prob_win_dict):
     
     #######################APPEND EV DATA TO DATAFRAME#############################
                 
-                ev_data = [{'index': ind, 'EV_low_tier': EV_low,
-                            'EV_higher_tier': EV_high, 'future_time_block': future_time,
-                            'oddsB lower tier ML':oddsB_low, 'oddsB higher tier ML':oddsB_high, 
-                            'probability':prob_win,'kelly':kelly}]
+                ev_data = [{'index': ind, 'EV_low_tier': round(EV_low),
+                            'EV_higher_tier': round(EV_high), 'future_time_block': future_time, 'future_score':future_score,
+                            'oddsB lower tier ML':round(oddsB_low), 'oddsB higher tier ML':round(oddsB_high), 
+                            'probability':prob_win,'kelly':round(kelly)}]
                 ev_out_df = ev_out_df.append(ev_data, ignore_index=True, sort=False)
 
 
@@ -178,7 +178,7 @@ def get_EV(bet1, bank_roll, prob_win_dict):
             EV_df_over20 = EV_final_full[(EV_final_full['EV_low_tier'].between(20,100)) | (EV_final_full['EV_higher_tier'].between(20,100))]
             
             relevant_feats = ['Current Time','lower tier team', 'higher tier team','lower tier points', 'higher tier points',
-                              'lower tier fractional', 'higher tier fractional','time_sec', 'low_score',
+                              'lower tier fractional', 'higher tier fractional','time_sec', 'future_score',
                               'EV_low_tier', 'EV_higher_tier', 'oddsB lower tier ML', 'oddsB higher tier ML', 'probability', 'kelly']
             EV_df_over20 = EV_df_over20[relevant_feats]
             EV_final_full = EV_final_full[relevant_feats]
