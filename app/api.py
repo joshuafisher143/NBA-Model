@@ -42,7 +42,7 @@ def get_inputs():
             json.dump(form_data, f)
             
         df = pd.DataFrame(columns=['Current Time','lower tier team', 'higher tier team','lower tier points', 'higher tier points',
-                          'lower tier fractional', 'higher tier fractional','time_sec', 'low_score', 'EV_low_tier',
+                          'lower tier fractional', 'higher tier fractional','time_sec', 'future_score', 'EV_low_tier',
                           'EV_higher_tier', 'oddsB lower tier ML', 'oddsB higher tier ML', 'probability', 'kelly'])
         
         df.to_csv('app/static/nightly_EVs.csv', index=None)
