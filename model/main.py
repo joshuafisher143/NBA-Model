@@ -154,9 +154,9 @@ def get_EV(bet1, bank_roll, prob_win_dict):
     #######################APPEND EV DATA TO DATAFRAME#############################
                 
                 ev_data = [{'index': ind, 'EV_low_tier': round(EV_low),
-                            'EV_higher_tier': round(EV_high), 'future_time_block': future_time, 'future_score':round(future_score),
+                            'EV_higher_tier': round(EV_high), 'future_time_block': future_time, 'future_score':int(future_score),
                             'oddsB lower tier ML':round(oddsB_low), 'oddsB higher tier ML':round(oddsB_high), 
-                            'probability':round(prob_win,2),'kelly':round(kelly)}]
+                            'probability':prob_win,'kelly':round(kelly)}]
                 ev_out_df = ev_out_df.append(ev_data, ignore_index=True, sort=False)
 
 
