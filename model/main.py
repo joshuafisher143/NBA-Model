@@ -17,14 +17,16 @@ from model.utils import calculate_EV
 from model.utils import oddsB_to_ML
 from model.utils import get_median_EV
 from model.utils import pd_to_gs
+from model.utils import filter_daily_file
 
 
-def get_EV(bet1, bank_roll, prob_win_dict):   
+def get_EV(bet1, bank_roll, prob_win_dict, team_list):   
 ######################GAME STATS FOR EACH GAME################################
     tz = timezone('US/Eastern')
     current_time = datetime.datetime.now(tz).strftime('%Y/%m/%d %I:%M:%S')
 
     game_info_dict = request_game_stats(os.environ['STATS_API_KEY'])
+
 
     
     #make empty dataframe to append the stats data to for each game
@@ -46,6 +48,7 @@ def get_EV(bet1, bank_roll, prob_win_dict):
 
 ######################GAME ODDS FOR EACH GAME#################################
     go_dict = request_game_odds(os.environ['ODDS_API_KEY'])
+
 
 
     #make empty dataframe to append odds data to for each game
@@ -89,6 +92,7 @@ def get_EV(bet1, bank_roll, prob_win_dict):
     for game in live_df.index:
         try:
             dfile = pd.read_csv('app/static/daily_file.csv')
+            dfile = filter_daily_file(dfile, team_list)
     
             daily_file_filtered = dfile[dfile['time_sec'] > live_df['Time_elapsed'].loc[game]]
             #filter out teams that don't relate to current looped index

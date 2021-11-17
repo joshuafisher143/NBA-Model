@@ -199,6 +199,24 @@ def color_positive_green(value):
     else:
         color = 'white'
     return 'background-color: %s' % color
+
+def filter_daily_file(daily_file, team_list):
+    
+    df=daily_file.copy()
+    
+    lower_tier_teams = []
+    higher_tier_teams = []
+    for matchup in team_list:
+        teams = matchup.split(' vs. ')
+        lower_tier_team, higher_tier_team = teams[0], teams[1]
+        lower_tier_teams.append(lower_tier_team)
+        higher_tier_teams.append(higher_tier_team)
+    
+    df = df[df['lower tier team'].isin(lower_tier_teams)] 
+    df = df[df['higher tier team'].isin(higher_tier_teams)]
+    
+    return df
+        
     
     
     

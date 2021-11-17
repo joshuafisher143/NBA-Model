@@ -22,18 +22,19 @@ def get_portal_odds():
 
     # driver = webdriver.Chrome(options=options, executable_path='C:/Users/joshu/Documents/py_projects/NBA-Model/old/chromedriver.exe')
     driver = webdriver.Chrome(options=options, executable_path=os.environ['CHROMEDRIVER_PATH'])
-    driver.get('https://www.oddsportal.com/basketball/usa/nba/')   
+    driver.get('https://www.oddsportal.com/basketball/usa/nba/')  
+    time.sleep(1)
     
     result=None
     while result is None:
         try:
-            time.sleep(1.5)
+            time.sleep(2)
             driver.find_element(By.XPATH, '//*[@id="user-header-oddsformat-expander"]').click()
-            time.sleep(1.5)
+            time.sleep(2)
             driver.find_element(By.XPATH, '//*[@id="user-header-oddsformat"]/li[3]/a').click()
-            time.sleep(1.5)
+            time.sleep(2)
             driver.find_element(By.XPATH, '//*[@id="user-header-timezone-expander"]').click()
-            time.sleep(1.5)
+            time.sleep(2)
             driver.find_element(By.XPATH, '//*[@id="timezone-content"]/a[40]').click()
             result = True
         except:

@@ -1,3 +1,4 @@
 config.py
 old/
-__pycache__/
+**/__pycache__/
+worker.py
